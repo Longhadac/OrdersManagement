@@ -13,36 +13,38 @@ using OpenQA.Selenium.Firefox;
 using OpenQA.Selenium;
 using System.Configuration;
 using MySql.Data.MySqlClient;
+using OpenQA.Selenium.Support.UI;
 
 namespace OrdersManagement
 {
     public partial class Form1 : Form
     {
         public static IWebDriver firefoxDriver;
-        private string profilesFolder = "";        
-        BindingSource bindingSource= new BindingSource();
+        private string profilesFolder = "";
+        private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
+        private int timeOut = 0;
         public Form1()
         {
             InitializeComponent();
             foreach(var status in Enum.GetNames(typeof(Status)).ToList())
             {
-                //cbStatus.Items.Add(status);
                 cbStatusFilter.Items.Add(status);
-            }            
+            }
+            log.Info("Start the program");
+            timeOut = int.Parse(ConfigurationManager.AppSettings["TimeOutForWaiting"].ToString());
         }
 
         private void Button1_Click(object sender, EventArgs e)
-        {            
+        {
+            log.Info("Start load user profile");
             FirefoxProfile profile = new FirefoxProfile(Path.Combine(profilesFolder, cbUsers.SelectedItem.ToString()));
             FirefoxOptions opt = new FirefoxOptions();
             opt.Profile = profile;
             //@@TODO: remove comment
-            //firefoxDriver = new FirefoxDriver(opt);
+            firefoxDriver = new FirefoxDriver(opt);
 
-            //bindingSource.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
-            //dataGridView1.DataSource = bindingSource;
-            dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
-            // BindingDataFromGridView();
+            //dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
+            log.Info("Finish load user profile");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -54,6 +56,7 @@ namespace OrdersManagement
                 //string[] temp = Path.GetFileName(directory).Split('.');
                 cbUsers.Items.Add(Path.GetFileName(directory));
             }
+            log.Info("Finish load firefox profiles");
         }
 
         private UsersType LoadUsers()
@@ -67,15 +70,6 @@ namespace OrdersManagement
             
         }
 
-        private void BindingDataFromGridView()
-        {
-            //cbStatus.DataBindings.Add(new System.Windows.Forms.Binding("Text", bindingSource, "Status", true,DataSourceUpdateMode.OnPropertyChanged));
-            tbAliId.DataBindings.Add(new System.Windows.Forms.Binding("Text", bindingSource, "AliId", true, DataSourceUpdateMode.OnPropertyChanged));
-            tbAliCashAmount.DataBindings.Add(new System.Windows.Forms.Binding("Text", bindingSource, "AliCashAmount", true, DataSourceUpdateMode.OnPropertyChanged));
-            tbAliTrackNumber.DataBindings.Add(new System.Windows.Forms.Binding("Text", bindingSource, "AliTrackingNumber", true, DataSourceUpdateMode.OnPropertyChanged));
-            tbRefund.DataBindings.Add(new System.Windows.Forms.Binding("Text", bindingSource, "Refund", true, DataSourceUpdateMode.OnPropertyChanged));
-        }
-
         private void BtUpdate_Click(object sender, EventArgs e)
         {
             bool isUpdateAli = false;
@@ -85,6 +79,8 @@ namespace OrdersManagement
                 isUpdateAli = true;
             if (string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString()) && !string.IsNullOrEmpty(tbAliTrackNumber.Text))
                 isUpdateTracking = true;
+
+            log.Info("Update data to DB. Is update AliID: " + isUpdateAli.ToString() + ". Is update AliTrackingNumber: " + isUpdateTracking.ToString());
 
             dataGridView1.SelectedRows[0].Cells["AliId"].Value = tbAliId.Text;
             dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value = tbAliCashAmount.Text;
@@ -99,6 +95,107 @@ namespace OrdersManagement
         private void BtnGetAmzOrder_Click(object sender, EventArgs e)
         {
             //Get new order from Amazon: update shipment status
+            firefoxDriver.Navigate().GoToUrl("https://sellercentral.amazon.com/orders-v3/ref=xx_myo_dnav_xx");
+            List<AmzOrder> amzOrders = new List<AmzOrder>();
+            string orderXpath = ConfigurationManager.AppSettings["OrderLinkXPath"].ToString();
+            string refreshXpath = ConfigurationManager.AppSettings["RefreshButton"].ToString();
+
+            firefoxDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(timeOut);
+            bool continueCheck = true;
+            int count = 0;
+            while (continueCheck)
+            {
+                try
+                {
+                    AmzOrder newOrder = new AmzOrder();
+
+                    IWebElement refreshButton = firefoxDriver.FindElement(By.XPath(refreshXpath));
+                    refreshButton.Click();
+
+                    IWebElement orderElement = firefoxDriver.FindElement(By.XPath(orderXpath));
+                    orderElement.Click();
+
+                    //Get Order information
+                    string OrderIdXPath = ConfigurationManager.AppSettings["OrderIdXPath"].ToString();
+                    string PurchaseDateXPath = ConfigurationManager.AppSettings["PurchaseDateXPath"].ToString();
+                    string CountryXPath = ConfigurationManager.AppSettings["CountryXPath"].ToString();
+                    string ShipAddressXPath = ConfigurationManager.AppSettings["ShipAddressXPath"].ToString();
+                    string ShipPhoneXPath = ConfigurationManager.AppSettings["ShipPhoneXPath"].ToString();
+
+                    newOrder.OrderId = firefoxDriver.FindElement(By.XPath(OrderIdXPath)).Text;
+                    newOrder.PurchasedDate = firefoxDriver.FindElement(By.XPath(PurchaseDateXPath)).Text;
+                    newOrder.Country = firefoxDriver.FindElement(By.XPath(CountryXPath)).Text;
+                    newOrder.ShipAddress = firefoxDriver.FindElement(By.XPath(ShipAddressXPath)).Text;
+                    newOrder.ShipPhone = firefoxDriver.FindElement(By.XPath(ShipPhoneXPath)).Text;
+
+                    //Get items information
+                    bool continueItem = true;
+                    string ItemImage = ConfigurationManager.AppSettings["ItemImage"].ToString();
+                    string ItemAsin = ConfigurationManager.AppSettings["ItemAsin"].ToString();
+                    string ItemSku = ConfigurationManager.AppSettings["ItemSku"].ToString();
+                    string ItemQuantity = ConfigurationManager.AppSettings["ItemQuantity"].ToString();
+                    string ItemUnitPrice = ConfigurationManager.AppSettings["ItemUnitPrice"].ToString();
+                    string ItemSubTotal = ConfigurationManager.AppSettings["ItemSubTotal"].ToString();
+
+                    while (continueItem)
+                    {
+                        try
+                        {
+                            AmzItem newItem = new AmzItem();
+                            newItem.ImageUrl = firefoxDriver.FindElement(By.XPath(ItemImage)).GetAttribute("src");
+                            newItem.Asin = firefoxDriver.FindElement(By.XPath(ItemAsin)).Text;
+                            newItem.Sku = firefoxDriver.FindElement(By.XPath(ItemSku)).Text;
+                            newItem.Quantity = firefoxDriver.FindElement(By.XPath(ItemQuantity)).Text;
+                            newItem.UnitPrice = firefoxDriver.FindElement(By.XPath(ItemUnitPrice)).Text;
+                            newItem.SubTotal = firefoxDriver.FindElement(By.XPath(ItemSubTotal)).Text;
+
+                            newOrder.Items.Add(newItem);
+
+                            //Update xpath for next item
+                            ItemImage += "1";
+                            ItemAsin += "1";
+                            ItemSku += "1";
+                            ItemQuantity += "1";
+                            ItemUnitPrice += "1";
+                            ItemSubTotal += "1";
+                        }
+                        catch (Exception ex)
+                        {
+                            log.Warn("Get item from Amz. OrderId: " + newOrder.OrderId + ". Exception: " + ex.ToString());
+                            continueItem = false;
+                        }
+                    }
+
+                    amzOrders.Add(newOrder);
+                }
+                catch (Exception ex)
+                {
+                    log.Warn("Get order from Amz. " + ex.ToString());
+                    count++;
+                    if (count > int.Parse(ConfigurationManager.AppSettings["NumberOfRetry"].ToString()))
+                        continueCheck = false;
+                }
+
+                //Confirm shipment for this order                
+                try
+                {
+                    string ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipment"].ToString();
+                    firefoxDriver.FindElement(By.XPath(ConfirmShipment)).Click();
+
+                    string ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2"].ToString();
+                    firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
+
+                    string ConfirmShipment3 = ConfigurationManager.AppSettings["ConfirmShipment3"].ToString();
+                    firefoxDriver.FindElement(By.XPath(ConfirmShipment3)).Click();
+                }
+                catch (Exception ex)
+                {
+                    log.Warn("Do not need to confirm shipment" +ex.ToString());
+                }
+            }
+
+            //Save to DB
+            SaveOrderToDB(amzOrders);
         }
 
         private DataSet LoadOrderFromDB(string userName)
@@ -128,6 +225,9 @@ namespace OrdersManagement
 
         private void UpdateToDB(int Id, string AliId, string AliCashAmount,string AliTrackingNumber, string Refund, bool isUpdateAli, bool isUpdateTracking)
         {
+            log.Info("Save data to DB. Id, AliId, AliCashAmount, AliTrackingNumber, Refund: " + Id.ToString()
+                + ", " + AliId + ", " + AliCashAmount + ", " + AliTrackingNumber + ", " + Refund);
+
             MySqlConnection conn = new MySqlConnection(ConfigurationManager.AppSettings["MySQLConnection"]);
             conn.Open();
 
@@ -163,7 +263,7 @@ namespace OrdersManagement
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Number is invalid" + ex.ToString());
+                log.Error("Parsing number error. " + ex.ToString());
             }
             
             cmd.Parameters.AddWithValue("@AliTrackingNumber", AliTrackingNumber);
@@ -173,10 +273,18 @@ namespace OrdersManagement
                 cmd.Parameters.AddWithValue("@AliTrackingDate", "");
             
             cmd.Parameters.AddWithValue("@Id", Id);
-            cmd.ExecuteNonQuery();
-            conn.Close();
-            cmd.Dispose();
-            conn.Dispose();
+            try
+            {
+                cmd.ExecuteNonQuery();
+                conn.Close();
+                cmd.Dispose();
+                conn.Dispose();
+            }
+            catch(Exception ex)
+            {
+                log.Error("Save data to DB error. " + ex.ToString());
+            }
+            
         }
         private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -184,6 +292,11 @@ namespace OrdersManagement
             tbAliCashAmount.Text = dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value.ToString();
             tbAliTrackNumber.Text = dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString();
             tbRefund.Text = dataGridView1.SelectedRows[0].Cells["Refund"].Value.ToString();
+        }
+
+        private void SaveOrderToDB(List<AmzOrder> orders)
+        {
+
         }
     }
 
@@ -209,5 +322,30 @@ namespace OrdersManagement
         Shipped=2,
         Finished=3,
         Refund=4
+    }
+
+    public class AmzOrder
+    {
+        public string OrderId;
+        public string PurchasedDate;
+        public string ShipAddress;
+        public string ShipPhone;
+        public string Country;
+        public List<AmzItem> Items;
+
+        public AmzOrder()
+        {
+            Items = new List<AmzItem>();
+        }
+    }
+
+    public class AmzItem
+    {
+        public string ImageUrl;
+        public string Asin;
+        public string Sku;
+        public string UnitPrice;
+        public string SubTotal;
+        public string Quantity;
     }
 }
