@@ -14,6 +14,9 @@ using OpenQA.Selenium;
 using System.Configuration;
 using MySql.Data.MySqlClient;
 using OpenQA.Selenium.Support.UI;
+using System.Globalization;
+using OpenQA.Selenium.Interactions;
+using System.Threading;
 
 namespace OrdersManagement
 {
@@ -23,6 +26,8 @@ namespace OrdersManagement
         private string profilesFolder = "";
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
         private int timeOut = 0;
+        string connectionString = "";
+        int threadDelay;
         public Form1()
         {
             InitializeComponent();
@@ -32,6 +37,8 @@ namespace OrdersManagement
             }
             log.Info("Start the program");
             timeOut = int.Parse(ConfigurationManager.AppSettings["TimeOutForWaiting"].ToString());
+            connectionString = ConfigurationManager.AppSettings["MySQLConnectionLocal"];
+            threadDelay = int.Parse(ConfigurationManager.AppSettings["DelayThread"].ToString());
         }
 
         private void Button1_Click(object sender, EventArgs e)
@@ -43,7 +50,7 @@ namespace OrdersManagement
             //@@TODO: remove comment
             firefoxDriver = new FirefoxDriver(opt);
 
-            //dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
+            dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
             log.Info("Finish load user profile");
         }
 
@@ -98,6 +105,7 @@ namespace OrdersManagement
             firefoxDriver.Navigate().GoToUrl("https://sellercentral.amazon.com/orders-v3/ref=xx_myo_dnav_xx");
             List<AmzOrder> amzOrders = new List<AmzOrder>();
             string orderXpath = ConfigurationManager.AppSettings["OrderLinkXPath"].ToString();
+            string orderCSS = ConfigurationManager.AppSettings["OrderLinkCSS"].ToString();
             string refreshXpath = ConfigurationManager.AppSettings["RefreshButton"].ToString();
 
             firefoxDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(timeOut);
@@ -108,13 +116,14 @@ namespace OrdersManagement
                 try
                 {
                     AmzOrder newOrder = new AmzOrder();
-
+                    Thread.Sleep(threadDelay);
                     IWebElement refreshButton = firefoxDriver.FindElement(By.XPath(refreshXpath));
                     refreshButton.Click();
-
-                    IWebElement orderElement = firefoxDriver.FindElement(By.XPath(orderXpath));
+                    Thread.Sleep(threadDelay);
+                    //IWebElement orderElement = firefoxDriver.FindElement(By.XPath(orderXpath));
+                    IWebElement orderElement = firefoxDriver.FindElement(By.CssSelector(orderCSS));
                     orderElement.Click();
-
+                    Thread.Sleep(threadDelay);
                     //Get Order information
                     string OrderIdXPath = ConfigurationManager.AppSettings["OrderIdXPath"].ToString();
                     string PurchaseDateXPath = ConfigurationManager.AppSettings["PurchaseDateXPath"].ToString();
@@ -180,13 +189,27 @@ namespace OrdersManagement
                 try
                 {
                     string ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipment"].ToString();
-                    firefoxDriver.FindElement(By.XPath(ConfirmShipment)).Click();
+                    ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipmentCSS"].ToString();
+                    //firefoxDriver.FindElement(By.XPath(ConfirmShipment)).Click();
+                    firefoxDriver.FindElement(By.CssSelector(ConfirmShipment)).Click();
 
                     string ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2"].ToString();
-                    firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
+                    ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2CSS"].ToString();
+                    //firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
+                    Thread.Sleep(threadDelay);
+                    firefoxDriver.FindElement(By.CssSelector(ConfirmShipment2)).Click();
 
                     string ConfirmShipment3 = ConfigurationManager.AppSettings["ConfirmShipment3"].ToString();
-                    firefoxDriver.FindElement(By.XPath(ConfirmShipment3)).Click();
+                    ConfirmShipment3 = ConfigurationManager.AppSettings["ConfirmShipment3CSS"].ToString();
+                    Thread.Sleep(threadDelay);
+                    firefoxDriver.FindElement(By.CssSelector(ConfirmShipment3)).Click();
+                    
+                    //IWebElement element = firefoxDriver.FindElement(By.XPath(ConfirmShipment3));
+                    //element.Click();
+                    //Actions actions = new Actions(firefoxDriver);
+                    //actions.MoveToElement(element);
+                    //actions.Click();
+                    //actions.Perform();
                 }
                 catch (Exception ex)
                 {
@@ -201,8 +224,7 @@ namespace OrdersManagement
         private DataSet LoadOrderFromDB(string userName)
         {
             //Load data from DB for selected users
-            MySqlConnection conn;
-            string connectionString = ConfigurationManager.AppSettings["MySQLConnection"];
+            MySqlConnection conn;            
             try
             {
                 conn = new MySqlConnection();
@@ -218,7 +240,7 @@ namespace OrdersManagement
             }
             catch (MySql.Data.MySqlClient.MySqlException ex)
             {
-                MessageBox.Show(ex.Message);
+                log.Info("Cannot load data from DB. " + ex.Message);
                 return null;
             }
         }
@@ -228,7 +250,7 @@ namespace OrdersManagement
             log.Info("Save data to DB. Id, AliId, AliCashAmount, AliTrackingNumber, Refund: " + Id.ToString()
                 + ", " + AliId + ", " + AliCashAmount + ", " + AliTrackingNumber + ", " + Refund);
 
-            MySqlConnection conn = new MySqlConnection(ConfigurationManager.AppSettings["MySQLConnection"]);
+            MySqlConnection conn = new MySqlConnection(connectionString);
             conn.Open();
 
             string updateCmd = "UPDATE Orders SET AliId=@AliId, AliDate=@AliDate, AliCashAmount=@AliCashAmount, AliTrackingNumber=@AliTrackingNumber, "
@@ -295,8 +317,49 @@ namespace OrdersManagement
         }
 
         private void SaveOrderToDB(List<AmzOrder> orders)
-        {
+        {            
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            conn.Open();
+            
+            foreach (AmzOrder order in orders)
+            {
+                //Save to Table Order: Clean data before saving
+                string replacedString = order.PurchasedDate.Replace(" PDT", "");
+                //Get Account Id from configuration file
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "INSERT INTO Orders(AmzOrderId,AccountId, PurchasedDate, Country, ShipAddress, ShipPhone, Status) " +
+                    "VALUES(@AmzOrderId, @AccountId, @PurchasedDate,@Country,@ShipAddress,@ShipPhone,@Status)";
+                comm.Parameters.AddWithValue("@AmzOrderId", order.OrderId);
+                comm.Parameters.AddWithValue("@AccountId", "MyAccountId");
+                comm.Parameters.AddWithValue("@PurchasedDate", DateTime.Parse(replacedString));
+                comm.Parameters.AddWithValue("@Country", order.Country);
+                comm.Parameters.AddWithValue("@ShipAddress", order.ShipAddress);
+                comm.Parameters.AddWithValue("@ShipPhone", order.ShipPhone);
+                comm.Parameters.AddWithValue("@Status", "NewOrder");
 
+                comm.ExecuteNonQuery();
+
+                long newOrderId = comm.LastInsertedId;
+                //Save Item to table Item
+                foreach (AmzItem item in order.Items)
+                {
+                    comm.CommandText = "INSERT INTO Items(OrderId,Image, Asin, Sku, Quantity, UnitPrice, SubTotal) " +
+                    "VALUES(@OrderId, @Image, @Asin,@Sku,@Quantity,@UnitPrice,@SubTotal)";
+
+                    comm.Parameters.AddWithValue("@OrderId", newOrderId);
+                    comm.Parameters.AddWithValue("@Image", item.ImageUrl);
+                    comm.Parameters.AddWithValue("@Asin", item.Asin);
+                    comm.Parameters.AddWithValue("@Sku", item.Sku.Replace("SKU: ", ""));
+                    comm.Parameters.AddWithValue("@Quantity", item.Quantity);
+                    comm.Parameters.AddWithValue("@UnitPrice", decimal.Parse(item.UnitPrice.Remove(0,2), NumberStyles.Currency));
+                    comm.Parameters.AddWithValue("@SubTotal", decimal.Parse(item.SubTotal.Remove(0, 2), NumberStyles.Currency));
+
+                    comm.ExecuteNonQuery();
+                }
+            }
+
+            conn.Close();
+            conn.Dispose();
         }
     }
 
