@@ -28,6 +28,8 @@ namespace OrdersManagement
         private int timeOut = 0;
         string connectionString = "";
         int threadDelay;
+        List<string> ffProfiles;
+        UsersType userMap;
         public Form1()
         {
             InitializeComponent();
@@ -41,29 +43,41 @@ namespace OrdersManagement
             threadDelay = int.Parse(ConfigurationManager.AppSettings["DelayThread"].ToString());
         }
 
-        private void Button1_Click(object sender, EventArgs e)
+        private void btnLoadProfile_Click(object sender, EventArgs e)
         {
             log.Info("Start load user profile");
-            FirefoxProfile profile = new FirefoxProfile(Path.Combine(profilesFolder, cbUsers.SelectedItem.ToString()));
+            string firefoxProfile = "";
+            foreach(string fprofile in ffProfiles)
+            {
+                if(fprofile.Contains(cbUsers.SelectedItem.ToString()))
+                {
+                    firefoxProfile = fprofile;
+                    break;
+                }
+            }
+            FirefoxProfile profile = new FirefoxProfile(Path.Combine(profilesFolder, firefoxProfile));
             FirefoxOptions opt = new FirefoxOptions();
             opt.Profile = profile;
-            //@@TODO: remove comment
+            
             firefoxDriver = new FirefoxDriver(opt);
-
-            dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
+            
             log.Info("Finish load user profile");
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            ffProfiles = new List<string>();
             //Load all firefox profiles
             profilesFolder = ConfigurationManager.AppSettings["FireFoxProfiles"];
             foreach(var directory in Directory.GetDirectories(profilesFolder))
             {
-                //string[] temp = Path.GetFileName(directory).Split('.');
-                cbUsers.Items.Add(Path.GetFileName(directory));
+                string[] temp = Path.GetFileName(directory).Split('.');
+                ffProfiles.Add(Path.GetFileName(directory));
+                cbUsers.Items.Add(temp[1]);
             }
             log.Info("Finish load firefox profiles");
+
+            userMap = LoadUsers();
         }
 
         private UsersType LoadUsers()
@@ -81,22 +95,36 @@ namespace OrdersManagement
         {
             bool isUpdateAli = false;
             bool isUpdateTracking = false;
+            bool isUpdateRefund = false;
 
-            if (string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["AliId"].Value.ToString()) && !string.IsNullOrEmpty(tbAliId.Text))
+            if ((string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["AliId"].Value.ToString()) && !string.IsNullOrEmpty(tbAliId.Text))
+                || (dataGridView1.SelectedRows[0].Cells["AliId"].Value.ToString() != tbAliId.Text))
                 isUpdateAli = true;
-            if (string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString()) && !string.IsNullOrEmpty(tbAliTrackNumber.Text))
+            if ((string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString()) && !string.IsNullOrEmpty(tbAliTrackNumber.Text))
+                || (dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString() != tbAliTrackNumber.Text))
                 isUpdateTracking = true;
+            if ((string.IsNullOrEmpty(dataGridView1.SelectedRows[0].Cells["Refund"].Value.ToString()) && !string.IsNullOrEmpty(tbRefund.Text))
+                || (dataGridView1.SelectedRows[0].Cells["Refund"].Value.ToString() != tbRefund.Text))
+                isUpdateRefund = true;
 
             log.Info("Update data to DB. Is update AliID: " + isUpdateAli.ToString() + ". Is update AliTrackingNumber: " + isUpdateTracking.ToString());
 
             dataGridView1.SelectedRows[0].Cells["AliId"].Value = tbAliId.Text;
-            dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value = tbAliCashAmount.Text;
+            if(!string.IsNullOrWhiteSpace(tbAliCashAmount.Text))
+                dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value = tbAliCashAmount.Text;
             dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value = tbAliTrackNumber.Text;
-            dataGridView1.SelectedRows[0].Cells["Refund"].Value = tbRefund.Text;
+            if (!string.IsNullOrWhiteSpace(tbRefund.Text))
+                dataGridView1.SelectedRows[0].Cells["Refund"].Value = tbRefund.Text;
 
+            if(isUpdateAli)
+                dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Processed.ToString();
+            if (isUpdateTracking)
+                dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Shipped.ToString();
+            if (isUpdateRefund)
+                dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Refund.ToString();
             //Save data to DB
             UpdateToDB(int.Parse(dataGridView1.SelectedRows[0].Cells["Id"].Value.ToString()),tbAliId.Text, tbAliCashAmount.Text, tbAliTrackNumber.Text, 
-                tbRefund.Text, isUpdateAli, isUpdateTracking);
+                tbRefund.Text, isUpdateAli, isUpdateTracking, isUpdateRefund);
         }
 
         private void BtnGetAmzOrder_Click(object sender, EventArgs e)
@@ -139,34 +167,37 @@ namespace OrdersManagement
 
                     //Get items information
                     bool continueItem = true;
-                    string ItemImage = ConfigurationManager.AppSettings["ItemImage"].ToString();
-                    string ItemAsin = ConfigurationManager.AppSettings["ItemAsin"].ToString();
-                    string ItemSku = ConfigurationManager.AppSettings["ItemSku"].ToString();
-                    string ItemQuantity = ConfigurationManager.AppSettings["ItemQuantity"].ToString();
-                    string ItemUnitPrice = ConfigurationManager.AppSettings["ItemUnitPrice"].ToString();
-                    string ItemSubTotal = ConfigurationManager.AppSettings["ItemSubTotal"].ToString();
-
+                    string ItemImage = ConfigurationManager.AppSettings["ItemImageCSS"].ToString();
+                    string ItemAsin = ConfigurationManager.AppSettings["ItemAsinCSS"].ToString();
+                    string ItemSku = ConfigurationManager.AppSettings["ItemSkuCSS"].ToString();
+                    string ItemQuantity = ConfigurationManager.AppSettings["ItemQuantityCSS"].ToString();
+                    string ItemUnitPrice = ConfigurationManager.AppSettings["ItemUnitPriceCSS"].ToString();
+                    string ItemSubTotal = ConfigurationManager.AppSettings["ItemSubTotalCSS"].ToString();
+                    int itemCount = 1;
                     while (continueItem)
                     {
                         try
                         {
                             AmzItem newItem = new AmzItem();
-                            newItem.ImageUrl = firefoxDriver.FindElement(By.XPath(ItemImage)).GetAttribute("src");
-                            newItem.Asin = firefoxDriver.FindElement(By.XPath(ItemAsin)).Text;
-                            newItem.Sku = firefoxDriver.FindElement(By.XPath(ItemSku)).Text;
-                            newItem.Quantity = firefoxDriver.FindElement(By.XPath(ItemQuantity)).Text;
-                            newItem.UnitPrice = firefoxDriver.FindElement(By.XPath(ItemUnitPrice)).Text;
-                            newItem.SubTotal = firefoxDriver.FindElement(By.XPath(ItemSubTotal)).Text;
+                            newItem.ImageUrl = firefoxDriver.FindElement(By.CssSelector(ItemImage)).GetAttribute("src");
+                            newItem.Asin = firefoxDriver.FindElement(By.CssSelector(ItemAsin)).Text;
+                            newItem.Sku = firefoxDriver.FindElement(By.CssSelector(ItemSku)).Text;
+                            newItem.Quantity = firefoxDriver.FindElement(By.CssSelector(ItemQuantity)).Text;
+                            newItem.UnitPrice = firefoxDriver.FindElement(By.CssSelector(ItemUnitPrice)).Text;
+                            newItem.SubTotal = firefoxDriver.FindElement(By.CssSelector(ItemSubTotal)).Text;
 
                             newOrder.Items.Add(newItem);
 
                             //Update xpath for next item
-                            ItemImage += "1";
-                            ItemAsin += "1";
-                            ItemSku += "1";
-                            ItemQuantity += "1";
-                            ItemUnitPrice += "1";
-                            ItemSubTotal += "1";
+                            string oldValue = "tr:nth-child(" + itemCount.ToString() + ")";
+                            itemCount++;
+                            string newValue = "tr:nth-child(" + itemCount.ToString() + ")";
+                            ItemImage = ItemImage.Replace(oldValue, newValue);
+                            ItemAsin = ItemAsin.Replace(oldValue, newValue);
+                            ItemSku = ItemSku.Replace(oldValue, newValue);
+                            ItemQuantity = ItemQuantity.Replace(oldValue, newValue);
+                            ItemUnitPrice = ItemUnitPrice.Replace(oldValue, newValue);
+                            ItemSubTotal = ItemSubTotal.Replace(oldValue, newValue);
                         }
                         catch (Exception ex)
                         {
@@ -174,7 +205,6 @@ namespace OrdersManagement
                             continueItem = false;
                         }
                     }
-
                     amzOrders.Add(newOrder);
                 }
                 catch (Exception ex)
@@ -194,22 +224,15 @@ namespace OrdersManagement
                     firefoxDriver.FindElement(By.CssSelector(ConfirmShipment)).Click();
 
                     string ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2"].ToString();
-                    ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2CSS"].ToString();
-                    //firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
+                    //ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2CSS"].ToString();
                     Thread.Sleep(threadDelay);
-                    firefoxDriver.FindElement(By.CssSelector(ConfirmShipment2)).Click();
+                    firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
+                    //firefoxDriver.FindElement(By.CssSelector(ConfirmShipment2)).Click();
 
                     string ConfirmShipment3 = ConfigurationManager.AppSettings["ConfirmShipment3"].ToString();
                     ConfirmShipment3 = ConfigurationManager.AppSettings["ConfirmShipment3CSS"].ToString();
                     Thread.Sleep(threadDelay);
                     firefoxDriver.FindElement(By.CssSelector(ConfirmShipment3)).Click();
-                    
-                    //IWebElement element = firefoxDriver.FindElement(By.XPath(ConfirmShipment3));
-                    //element.Click();
-                    //Actions actions = new Actions(firefoxDriver);
-                    //actions.MoveToElement(element);
-                    //actions.Click();
-                    //actions.Perform();
                 }
                 catch (Exception ex)
                 {
@@ -219,9 +242,13 @@ namespace OrdersManagement
 
             //Save to DB
             SaveOrderToDB(amzOrders);
+
+            //Refress datagridview
+            dataGridView1.DataSource = null;
+            dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
         }
 
-        private DataSet LoadOrderFromDB(string userName)
+        private DataSet LoadOrderFromDB(string userName="")
         {
             //Load data from DB for selected users
             MySqlConnection conn;            
@@ -245,7 +272,7 @@ namespace OrdersManagement
             }
         }
 
-        private void UpdateToDB(int Id, string AliId, string AliCashAmount,string AliTrackingNumber, string Refund, bool isUpdateAli, bool isUpdateTracking)
+        private void UpdateToDB(int Id, string AliId, string AliCashAmount,string AliTrackingNumber, string Refund, bool isUpdateAli, bool isUpdateTracking, bool isUpdateRefund)
         {
             log.Info("Save data to DB. Id, AliId, AliCashAmount, AliTrackingNumber, Refund: " + Id.ToString()
                 + ", " + AliId + ", " + AliCashAmount + ", " + AliTrackingNumber + ", " + Refund);
@@ -257,12 +284,12 @@ namespace OrdersManagement
                 + "AliTrackingDate=@AliTrackingDate, Refund=@Refund WHERE Id=@Id";
             MySqlCommand cmd = conn.CreateCommand();
             cmd.CommandText = updateCmd;
-            cmd.Parameters.AddWithValue("@AliId", AliId);
+            cmd.Parameters.AddWithValue("@AliId", AliId.Trim());
 
             if (isUpdateAli)
-                cmd.Parameters.AddWithValue("@AliDate", DateTime.Now);
+                cmd.Parameters.AddWithValue("@AliDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             else
-                cmd.Parameters.AddWithValue("@AliDate", "");
+                cmd.Parameters.AddWithValue("@AliDate", "0000-00-00 00:00:00");
 
             //Parsing double value
             try
@@ -288,16 +315,31 @@ namespace OrdersManagement
                 log.Error("Parsing number error. " + ex.ToString());
             }
             
-            cmd.Parameters.AddWithValue("@AliTrackingNumber", AliTrackingNumber);
+            cmd.Parameters.AddWithValue("@AliTrackingNumber", AliTrackingNumber.Trim());
             if (isUpdateTracking)
                 cmd.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             else
-                cmd.Parameters.AddWithValue("@AliTrackingDate", "");
+                cmd.Parameters.AddWithValue("@AliTrackingDate", "0000-00-00 00:00:00");
             
             cmd.Parameters.AddWithValue("@Id", Id);
             try
             {
                 cmd.ExecuteNonQuery();
+
+                //Update status
+                if(isUpdateAli || isUpdateTracking || isUpdateRefund)
+                {
+                    MySqlCommand newCmd = conn.CreateCommand();
+                    newCmd.CommandText = "UPDATE Orders SET Status = @Status WHERE Id=@Id";
+                    newCmd.Parameters.AddWithValue("@Id", Id);                    
+                    if (isUpdateRefund)
+                        newCmd.Parameters.AddWithValue("@Status", Status.Refund.ToString());
+                    else if (isUpdateTracking)
+                        newCmd.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                    else if (isUpdateAli)
+                        newCmd.Parameters.AddWithValue("@Status", Status.Processed.ToString());
+                    newCmd.ExecuteNonQuery();
+                }
                 conn.Close();
                 cmd.Dispose();
                 conn.Dispose();
@@ -323,14 +365,25 @@ namespace OrdersManagement
             
             foreach (AmzOrder order in orders)
             {
+                //Get map user account
+                string amzAccount = "";
+                foreach(var user in userMap.Users)
+                {
+                    if (user.FireFoxId == cbUsers.SelectedItem.ToString())
+                    {
+                        amzAccount = user.AmzUserId;
+                        break;
+                    }
+                }
+
                 //Save to Table Order: Clean data before saving
                 string replacedString = order.PurchasedDate.Replace(" PDT", "");
-                //Get Account Id from configuration file
+                //@@TODO: Get Account Id from configuration file
                 MySqlCommand comm = conn.CreateCommand();
                 comm.CommandText = "INSERT INTO Orders(AmzOrderId,AccountId, PurchasedDate, Country, ShipAddress, ShipPhone, Status) " +
                     "VALUES(@AmzOrderId, @AccountId, @PurchasedDate,@Country,@ShipAddress,@ShipPhone,@Status)";
                 comm.Parameters.AddWithValue("@AmzOrderId", order.OrderId);
-                comm.Parameters.AddWithValue("@AccountId", "MyAccountId");
+                comm.Parameters.AddWithValue("@AccountId", amzAccount);
                 comm.Parameters.AddWithValue("@PurchasedDate", DateTime.Parse(replacedString));
                 comm.Parameters.AddWithValue("@Country", order.Country);
                 comm.Parameters.AddWithValue("@ShipAddress", order.ShipAddress);
@@ -343,23 +396,89 @@ namespace OrdersManagement
                 //Save Item to table Item
                 foreach (AmzItem item in order.Items)
                 {
-                    comm.CommandText = "INSERT INTO Items(OrderId,Image, Asin, Sku, Quantity, UnitPrice, SubTotal) " +
+                    MySqlCommand newComm = conn.CreateCommand();
+                    newComm.CommandText = "INSERT INTO Items(OrderId,Image, Asin, Sku, Quantity, UnitPrice, SubTotal) " +
                     "VALUES(@OrderId, @Image, @Asin,@Sku,@Quantity,@UnitPrice,@SubTotal)";
 
-                    comm.Parameters.AddWithValue("@OrderId", newOrderId);
-                    comm.Parameters.AddWithValue("@Image", item.ImageUrl);
-                    comm.Parameters.AddWithValue("@Asin", item.Asin);
-                    comm.Parameters.AddWithValue("@Sku", item.Sku.Replace("SKU: ", ""));
-                    comm.Parameters.AddWithValue("@Quantity", item.Quantity);
-                    comm.Parameters.AddWithValue("@UnitPrice", decimal.Parse(item.UnitPrice.Remove(0,2), NumberStyles.Currency));
-                    comm.Parameters.AddWithValue("@SubTotal", decimal.Parse(item.SubTotal.Remove(0, 2), NumberStyles.Currency));
+                    newComm.Parameters.AddWithValue("@OrderId", newOrderId);
+                    newComm.Parameters.AddWithValue("@Image", item.ImageUrl);
+                    newComm.Parameters.AddWithValue("@Asin", item.Asin);
+                    newComm.Parameters.AddWithValue("@Sku", item.Sku.Replace("SKU: ", ""));
+                    newComm.Parameters.AddWithValue("@Quantity", item.Quantity);
+                    newComm.Parameters.AddWithValue("@UnitPrice", decimal.Parse(item.UnitPrice.Remove(0,2), NumberStyles.Currency));
+                    newComm.Parameters.AddWithValue("@SubTotal", decimal.Parse(item.SubTotal.Remove(0, 2), NumberStyles.Currency));
 
-                    comm.ExecuteNonQuery();
+                    newComm.ExecuteNonQuery();
                 }
             }
 
             conn.Close();
             conn.Dispose();
+        }
+
+        private string ConvertSkuToAliLink(string sku)
+        {
+            string result = "https://www.aliexpress.com/item/";
+            long IdNumber;
+            if (sku.Contains("-"))
+            {
+                string temp = sku.Split('-')[0];
+                if (temp.Length >= 11)
+                    IdNumber = long.Parse(temp.Substring(temp.Length - 11, 11)) - 1;
+                else
+                {
+                    temp = sku.Split('-')[1];
+                    IdNumber = long.Parse(temp.Substring(0, 11));
+                }
+            }
+            else
+            {
+                IdNumber = long.Parse(sku.Substring(sku.Length - 11, 11)) - 1;
+            }
+            result += IdNumber.ToString() + ".html";
+            return result;
+        }
+
+        private void BtnGetTracking_Click(object sender, EventArgs e)
+        {
+            //Get all order in status: Processed
+            var strExpr = "Status = 'Processed'";
+            var dv = LoadOrderFromDB().Tables[0].DefaultView;
+            dv.RowFilter = strExpr;
+
+            IWebDriver driver = new FirefoxDriver();
+            driver.Navigate().GoToUrl("https://trade.aliexpress.com");
+
+            string UserName = ConfigurationManager.AppSettings["UserName"];
+            string Password = ConfigurationManager.AppSettings["Password"];
+            string login = ConfigurationManager.AppSettings["NeedLogIn"];
+            Thread.Sleep(threadDelay);
+            if (login == "1")
+            {
+                IWebElement alibaba_login_box = driver.FindElement(By.Id("alibaba-login-box"));
+                driver.SwitchTo().Frame(alibaba_login_box);
+
+                driver.FindElement(By.Id("fm-login-id")).SendKeys(UserName);
+                driver.FindElement(By.Id("fm-login-password")).SendKeys(Password);
+                driver.FindElement(By.XPath("//*[@id='login-form']/div[5]/button")).Click();
+                driver.SwitchTo().ParentFrame();
+            }
+            Thread.Sleep(threadDelay);
+
+            foreach (DataRow row in dv.ToTable().Rows)
+            {
+                //IWebElement orderId = driver.FindElement(By.Id("//*[@id='order-no']"));
+                IWebElement orderId = driver.FindElement(By.Name("orderListSearch"));
+                driver.SwitchTo().Frame(orderId);
+                driver.FindElement(By.Id("//*[@id='order-no']")).SendKeys(row["AliId"].ToString());
+                //orderId.SendKeys(row["AliId"].ToString());
+            }
+
+        }
+
+        private void BtnLoadOrder_Click(object sender, EventArgs e)
+        {
+            dataGridView1.DataSource = LoadOrderFromDB().Tables[0];
         }
     }
 
@@ -372,10 +491,10 @@ namespace OrdersManagement
 
     public class UserType
     {
-        [XmlAttribute("Id")]
-        public string Id { get; set; }
-        [XmlAttribute("UserName")]
-        public string UserName { get; set; }
+        [XmlAttribute("FireFoxId")]
+        public string FireFoxId { get; set; }
+        [XmlAttribute("AmzUserId")]
+        public string AmzUserId { get; set; }
     }
 
     public enum Status

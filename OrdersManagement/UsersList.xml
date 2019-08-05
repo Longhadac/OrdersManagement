@@ -1,8 +1,18 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <Users>
-  <User Id="1" UserName="A12345678910" />
-  <User Id="2" UserName="B12345678910" />
-  <User Id="3" UserName="C12345678910" />
-  <User Id="4" UserName="D12345678910" />
-  <User Id="5" UserName="E12345678910" />
+  <User FireFoxId="AMZ_2_PQ_M" AmzUserId="AMZ_2" />
+  <User FireFoxId="AMZ_3_PQ_MO" AmzUserId="AMZ_3" />
+  <User FireFoxId="AMZ_4_PQ_M" AmzUserId="AMZ_4" />
+  <User FireFoxId="AMZ_5_PQ_MO" AmzUserId="AMZ_5" />
+  <User FireFoxId="AMZ_6_PQ_MO" AmzUserId="AMZ_6" />
+  <User FireFoxId="AMZ_7_PQ_MO" AmzUserId="AMZ_7" />
+  <User FireFoxId="AMZ_8_PQ_MO" AmzUserId="AMZ_8" />
+  <User FireFoxId="AMZ_9_PQ_MO" AmzUserId="AMZ_9" />
+  <User FireFoxId="AMZ_10_PQ_MO" AmzUserId="AMZ_10" />
+  <User FireFoxId="AMZ_11_PQ_MO" AmzUserId="AMZ_11" />
+  <User FireFoxId="AMZ_12_PQ_MO" AmzUserId="AMZ_12" />
+  <User FireFoxId="AMZ_13_PQ_MO" AmzUserId="AMZ_13" />
+  <User FireFoxId="AMZ_14_PQ_MO" AmzUserId="AMZ_14" />
+  <User FireFoxId="AMZ_15_PQ_MO" AmzUserId="AMZ_15" />
+  <User FireFoxId="AMZ_16_PQ_MO" AmzUserId="AMZ_16" />
 </Users>

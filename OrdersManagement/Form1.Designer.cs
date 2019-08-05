@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.cbUsers = new System.Windows.Forms.ComboBox();
-            this.button1 = new System.Windows.Forms.Button();
+            this.btnLoadProfile = new System.Windows.Forms.Button();
             this.dataGridView1 = new System.Windows.Forms.DataGridView();
             this.label1 = new System.Windows.Forms.Label();
             this.tbAliId = new System.Windows.Forms.TextBox();
@@ -42,10 +42,6 @@
             this.btUpdate = new System.Windows.Forms.Button();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.pictureBox5 = new System.Windows.Forms.PictureBox();
-            this.pictureBox6 = new System.Windows.Forms.PictureBox();
-            this.pictureBox7 = new System.Windows.Forms.PictureBox();
-            this.pictureBox8 = new System.Windows.Forms.PictureBox();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -55,13 +51,12 @@
             this.label7 = new System.Windows.Forms.Label();
             this.tbIdFilter = new System.Windows.Forms.TextBox();
             this.btnGetAmzOrder = new System.Windows.Forms.Button();
+            this.btnGetTracking = new System.Windows.Forms.Button();
+            this.btnFillTracking = new System.Windows.Forms.Button();
+            this.btnLoadOrder = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox8)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -78,30 +73,30 @@
             this.cbUsers.Size = new System.Drawing.Size(246, 33);
             this.cbUsers.TabIndex = 1;
             // 
-            // button1
+            // btnLoadProfile
             // 
-            this.button1.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button1.Location = new System.Drawing.Point(264, 8);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(125, 33);
-            this.button1.TabIndex = 2;
-            this.button1.Text = "Load Users";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.Button1_Click);
+            this.btnLoadProfile.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLoadProfile.Location = new System.Drawing.Point(289, 8);
+            this.btnLoadProfile.Name = "btnLoadProfile";
+            this.btnLoadProfile.Size = new System.Drawing.Size(125, 33);
+            this.btnLoadProfile.TabIndex = 2;
+            this.btnLoadProfile.Text = "Load Profile";
+            this.btnLoadProfile.UseVisualStyleBackColor = true;
+            this.btnLoadProfile.Click += new System.EventHandler(this.btnLoadProfile_Click);
             // 
             // dataGridView1
             // 
             this.dataGridView1.AllowUserToAddRows = false;
             this.dataGridView1.AllowUserToDeleteRows = false;
             this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Location = new System.Drawing.Point(13, 53);
+            this.dataGridView1.Location = new System.Drawing.Point(13, 98);
             this.dataGridView1.MultiSelect = false;
             this.dataGridView1.Name = "dataGridView1";
             this.dataGridView1.ReadOnly = true;
             this.dataGridView1.RowHeadersWidth = 51;
             this.dataGridView1.RowTemplate.Height = 24;
             this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(1251, 652);
+            this.dataGridView1.Size = new System.Drawing.Size(1251, 607);
             this.dataGridView1.TabIndex = 3;
             this.dataGridView1.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellClick);
             // 
@@ -199,61 +194,25 @@
             this.groupBox1.Controls.Add(this.label4);
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.tbAliTrackNumber);
-            this.groupBox1.Location = new System.Drawing.Point(1270, 44);
+            this.groupBox1.Location = new System.Drawing.Point(1270, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(495, 370);
+            this.groupBox1.Size = new System.Drawing.Size(495, 334);
             this.groupBox1.TabIndex = 15;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Update Data";
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.pictureBox5);
-            this.groupBox2.Controls.Add(this.pictureBox6);
-            this.groupBox2.Controls.Add(this.pictureBox7);
-            this.groupBox2.Controls.Add(this.pictureBox8);
             this.groupBox2.Controls.Add(this.pictureBox4);
             this.groupBox2.Controls.Add(this.pictureBox3);
             this.groupBox2.Controls.Add(this.pictureBox2);
             this.groupBox2.Controls.Add(this.pictureBox1);
-            this.groupBox2.Location = new System.Drawing.Point(1270, 421);
+            this.groupBox2.Location = new System.Drawing.Point(1270, 352);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(495, 275);
+            this.groupBox2.Size = new System.Drawing.Size(490, 353);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Images";
-            // 
-            // pictureBox5
-            // 
-            this.pictureBox5.Location = new System.Drawing.Point(370, 127);
-            this.pictureBox5.Name = "pictureBox5";
-            this.pictureBox5.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox5.TabIndex = 7;
-            this.pictureBox5.TabStop = false;
-            // 
-            // pictureBox6
-            // 
-            this.pictureBox6.Location = new System.Drawing.Point(246, 127);
-            this.pictureBox6.Name = "pictureBox6";
-            this.pictureBox6.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox6.TabIndex = 6;
-            this.pictureBox6.TabStop = false;
-            // 
-            // pictureBox7
-            // 
-            this.pictureBox7.Location = new System.Drawing.Point(126, 127);
-            this.pictureBox7.Name = "pictureBox7";
-            this.pictureBox7.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox7.TabIndex = 5;
-            this.pictureBox7.TabStop = false;
-            // 
-            // pictureBox8
-            // 
-            this.pictureBox8.Location = new System.Drawing.Point(6, 127);
-            this.pictureBox8.Name = "pictureBox8";
-            this.pictureBox8.Size = new System.Drawing.Size(100, 100);
-            this.pictureBox8.TabIndex = 4;
-            this.pictureBox8.TabStop = false;
             // 
             // pictureBox4
             // 
@@ -291,7 +250,7 @@
             // 
             this.cbStatusFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbStatusFilter.FormattingEnabled = true;
-            this.cbStatusFilter.Location = new System.Drawing.Point(707, 9);
+            this.cbStatusFilter.Location = new System.Drawing.Point(153, 54);
             this.cbStatusFilter.Name = "cbStatusFilter";
             this.cbStatusFilter.Size = new System.Drawing.Size(129, 33);
             this.cbStatusFilter.TabIndex = 18;
@@ -300,7 +259,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(586, 14);
+            this.label6.Location = new System.Drawing.Point(12, 57);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(115, 25);
             this.label6.TabIndex = 15;
@@ -310,7 +269,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(884, 14);
+            this.label7.Location = new System.Drawing.Point(326, 57);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(75, 25);
             this.label7.TabIndex = 21;
@@ -319,27 +278,62 @@
             // tbIdFilter
             // 
             this.tbIdFilter.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbIdFilter.Location = new System.Drawing.Point(965, 9);
+            this.tbIdFilter.Location = new System.Drawing.Point(419, 52);
             this.tbIdFilter.Name = "tbIdFilter";
-            this.tbIdFilter.Size = new System.Drawing.Size(299, 30);
+            this.tbIdFilter.Size = new System.Drawing.Size(279, 30);
             this.tbIdFilter.TabIndex = 15;
             // 
             // btnGetAmzOrder
             // 
             this.btnGetAmzOrder.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.btnGetAmzOrder.Location = new System.Drawing.Point(413, 9);
+            this.btnGetAmzOrder.Location = new System.Drawing.Point(438, 10);
             this.btnGetAmzOrder.Name = "btnGetAmzOrder";
-            this.btnGetAmzOrder.Size = new System.Drawing.Size(125, 33);
+            this.btnGetAmzOrder.Size = new System.Drawing.Size(206, 33);
             this.btnGetAmzOrder.TabIndex = 22;
             this.btnGetAmzOrder.Text = "Get Amz Order";
             this.btnGetAmzOrder.UseVisualStyleBackColor = true;
             this.btnGetAmzOrder.Click += new System.EventHandler(this.BtnGetAmzOrder_Click);
+            // 
+            // btnGetTracking
+            // 
+            this.btnGetTracking.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnGetTracking.Location = new System.Drawing.Point(1018, 8);
+            this.btnGetTracking.Name = "btnGetTracking";
+            this.btnGetTracking.Size = new System.Drawing.Size(227, 33);
+            this.btnGetTracking.TabIndex = 23;
+            this.btnGetTracking.Text = "Get Tracking Number";
+            this.btnGetTracking.UseVisualStyleBackColor = true;
+            this.btnGetTracking.Click += new System.EventHandler(this.BtnGetTracking_Click);
+            // 
+            // btnFillTracking
+            // 
+            this.btnFillTracking.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnFillTracking.Location = new System.Drawing.Point(1018, 49);
+            this.btnFillTracking.Name = "btnFillTracking";
+            this.btnFillTracking.Size = new System.Drawing.Size(227, 33);
+            this.btnFillTracking.TabIndex = 24;
+            this.btnFillTracking.Text = "Fill Tracking Number";
+            this.btnFillTracking.UseVisualStyleBackColor = true;
+            // 
+            // btnLoadOrder
+            // 
+            this.btnLoadOrder.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.btnLoadOrder.Location = new System.Drawing.Point(775, 12);
+            this.btnLoadOrder.Name = "btnLoadOrder";
+            this.btnLoadOrder.Size = new System.Drawing.Size(145, 33);
+            this.btnLoadOrder.TabIndex = 25;
+            this.btnLoadOrder.Text = "Load Orders";
+            this.btnLoadOrder.UseVisualStyleBackColor = true;
+            this.btnLoadOrder.Click += new System.EventHandler(this.BtnLoadOrder_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1777, 717);
+            this.Controls.Add(this.btnLoadOrder);
+            this.Controls.Add(this.btnFillTracking);
+            this.Controls.Add(this.btnGetTracking);
             this.Controls.Add(this.btnGetAmzOrder);
             this.Controls.Add(this.tbIdFilter);
             this.Controls.Add(this.label7);
@@ -348,7 +342,7 @@
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.dataGridView1);
-            this.Controls.Add(this.button1);
+            this.Controls.Add(this.btnLoadProfile);
             this.Controls.Add(this.cbUsers);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -359,10 +353,6 @@
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox5)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox6)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox7)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox8)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
@@ -376,7 +366,7 @@
 
        
         private System.Windows.Forms.ComboBox cbUsers;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button btnLoadProfile;
         private System.Windows.Forms.DataGridView dataGridView1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox tbAliId;
@@ -389,10 +379,6 @@
         private System.Windows.Forms.Button btUpdate;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.PictureBox pictureBox5;
-        private System.Windows.Forms.PictureBox pictureBox6;
-        private System.Windows.Forms.PictureBox pictureBox7;
-        private System.Windows.Forms.PictureBox pictureBox8;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.PictureBox pictureBox2;
@@ -402,6 +388,9 @@
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.TextBox tbIdFilter;
         private System.Windows.Forms.Button btnGetAmzOrder;
+        private System.Windows.Forms.Button btnGetTracking;
+        private System.Windows.Forms.Button btnFillTracking;
+        private System.Windows.Forms.Button btnLoadOrder;
     }
 }
 
