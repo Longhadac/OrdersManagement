@@ -465,20 +465,126 @@ namespace OrdersManagement
             }
             Thread.Sleep(threadDelay);
 
+            Dictionary<string, string> AliTrackingList = new Dictionary<string, string>();
             foreach (DataRow row in dv.ToTable().Rows)
             {
-                //IWebElement orderId = driver.FindElement(By.Id("//*[@id='order-no']"));
-                IWebElement orderId = driver.FindElement(By.Name("orderListSearch"));
-                driver.SwitchTo().Frame(orderId);
-                driver.FindElement(By.Id("//*[@id='order-no']")).SendKeys(row["AliId"].ToString());
-                //orderId.SendKeys(row["AliId"].ToString());
-            }
+                driver.Navigate().GoToUrl("https://trade.aliexpress.com");
+                Thread.Sleep(threadDelay);
 
+                IWebElement orderId = driver.FindElement(By.Id("order-no"));             
+                orderId.SendKeys(row["AliId"].ToString());
+                driver.FindElement(By.Id("search-btn")).Click();
+
+                string AliStatusXpath = ConfigurationManager.AppSettings["AliStatusXPath"];
+                string status = driver.FindElement(By.XPath(AliStatusXpath)).Text;
+                if(status == "Awaiting delivery")
+                {
+                    string AliOrderDetail = ConfigurationManager.AppSettings["AliOrderDetail"];
+                    driver.Navigate().GoToUrl(AliOrderDetail + row["AliId"].ToString());
+                    Thread.Sleep(threadDelay);
+
+                    string AliTrackingNumberXpath = ConfigurationManager.AppSettings["AliTrackingNumberXpath"];
+                    string AliTrackingNumber = driver.FindElement(By.XPath(AliTrackingNumberXpath)).Text;
+                    AliTrackingList.Add(row["Id"].ToString(), AliTrackingNumber);
+                }
+            }
+            //Save tracking number to DB
+            SaveTrackingNumberToDB(AliTrackingList);
         }
 
         private void BtnLoadOrder_Click(object sender, EventArgs e)
         {
             dataGridView1.DataSource = LoadOrderFromDB().Tables[0];
+        }
+
+        private void SaveTrackingNumberToDB(Dictionary<string,string> trackingList)
+        {
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            conn.Open();
+
+            foreach (KeyValuePair<string, string> entry in trackingList)
+            {
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE Orders SET AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate, " +
+                    " Status = @Status WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", entry.Key);
+                comm.Parameters.AddWithValue("@AliTrackingNumber", entry.Value.Trim());
+                comm.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                comm.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                comm.ExecuteNonQuery();
+            }
+
+            conn.Close();
+            conn.Dispose();
+        }
+
+        private void BtnFillTracking_Click(object sender, EventArgs e)
+        {            
+            //Get map user account
+            string amzAccount = "";
+            foreach (var user in userMap.Users)
+            {
+                if (user.FireFoxId == cbUsers.SelectedItem.ToString())
+                {
+                    amzAccount = user.AmzUserId;
+                    break;
+                }
+            }
+
+            //Get order which status equal: Shipped            
+            var strExpr = "Status = 'Shipped' AND AccountId = '"+ amzAccount +"'";
+            var dv = LoadOrderFromDB().Tables[0].DefaultView;
+            dv.RowFilter = strExpr;
+
+            firefoxDriver.Manage().Timeouts().ImplicitWait = TimeSpan.FromSeconds(timeOut);
+            string AmzOrderURL = ConfigurationManager.AppSettings["AmzOrderURL"];
+            List<string> Ids = new List<string>();
+            foreach (DataRow row in dv.ToTable().Rows)
+            {
+                firefoxDriver.Navigate().GoToUrl(AmzOrderURL+ row["AmzOrderId"].ToString());
+                Thread.Sleep(threadDelay);
+                string EditShipmentCSS = ConfigurationManager.AppSettings["EditShipmentCSS"].ToString();
+                firefoxDriver.FindElement(By.CssSelector(EditShipmentCSS)).Click();
+                //List<IWebElement> listButtons = firefoxDriver.FindElements(By.ClassName("a-button-input")).ToList();
+                //foreach(var element in listButtons)
+                //{
+                //    if (element.Text == "Edit shipment")
+                //        element.Click();
+                //}
+                //By.
+                Thread.Sleep(threadDelay);
+
+                string AmzTrackingNumber = ConfigurationManager.AppSettings["AmzTrackingNumber"].ToString();
+                firefoxDriver.FindElement(By.XPath(AmzTrackingNumber)).SendKeys(row["AliTrackingNumber"].ToString());
+
+                string EditShipmentConfirm = ConfigurationManager.AppSettings["EditShipmentConfirm"].ToString();
+                firefoxDriver.FindElement(By.XPath(EditShipmentConfirm)).Click();
+
+                Ids.Add(row["Id"].ToString());
+            }
+
+            //Update status to Finished
+            UpdateStatusToFinished(Ids);
+        }
+
+        private void UpdateStatusToFinished(List<string> Ids)
+        {
+            MySqlConnection conn = new MySqlConnection(connectionString);
+            conn.Open();
+
+            foreach (string id in Ids)
+            {
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE Orders SET Status = @Status WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", id);
+                comm.Parameters.AddWithValue("@Status", Status.Finished.ToString());
+                comm.ExecuteNonQuery();
+            }
+
+            conn.Close();
+            conn.Dispose();
         }
     }
 

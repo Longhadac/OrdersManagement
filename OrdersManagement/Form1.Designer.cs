@@ -314,6 +314,7 @@
             this.btnFillTracking.TabIndex = 24;
             this.btnFillTracking.Text = "Fill Tracking Number";
             this.btnFillTracking.UseVisualStyleBackColor = true;
+            this.btnFillTracking.Click += new System.EventHandler(this.BtnFillTracking_Click);
             // 
             // btnLoadOrder
             // 
