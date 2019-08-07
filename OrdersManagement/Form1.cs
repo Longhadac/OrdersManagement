@@ -17,6 +17,7 @@ using OpenQA.Selenium.Support.UI;
 using System.Globalization;
 using OpenQA.Selenium.Interactions;
 using System.Threading;
+using System.Diagnostics;
 
 namespace OrdersManagement
 {
@@ -30,10 +31,15 @@ namespace OrdersManagement
         int threadDelay;
         List<string> ffProfiles;
         UsersType userMap;
+        string link1 = "";
+        string link2 = "";
+        string link3 = "";
+        string link4 = "";
+
         public Form1()
         {
             InitializeComponent();
-            foreach(var status in Enum.GetNames(typeof(Status)).ToList())
+            foreach (var status in Enum.GetNames(typeof(Status)).ToList())
             {
                 cbStatusFilter.Items.Add(status);
             }
@@ -47,9 +53,9 @@ namespace OrdersManagement
         {
             log.Info("Start load user profile");
             string firefoxProfile = "";
-            foreach(string fprofile in ffProfiles)
+            foreach (string fprofile in ffProfiles)
             {
-                if(fprofile.Contains(cbUsers.SelectedItem.ToString()))
+                if (fprofile.Contains(cbUsers.SelectedItem.ToString()))
                 {
                     firefoxProfile = fprofile;
                     break;
@@ -58,9 +64,9 @@ namespace OrdersManagement
             FirefoxProfile profile = new FirefoxProfile(Path.Combine(profilesFolder, firefoxProfile));
             FirefoxOptions opt = new FirefoxOptions();
             opt.Profile = profile;
-            
+
             firefoxDriver = new FirefoxDriver(opt);
-            
+
             log.Info("Finish load user profile");
         }
 
@@ -69,7 +75,7 @@ namespace OrdersManagement
             ffProfiles = new List<string>();
             //Load all firefox profiles
             profilesFolder = ConfigurationManager.AppSettings["FireFoxProfiles"];
-            foreach(var directory in Directory.GetDirectories(profilesFolder))
+            foreach (var directory in Directory.GetDirectories(profilesFolder))
             {
                 string[] temp = Path.GetFileName(directory).Split('.');
                 ffProfiles.Add(Path.GetFileName(directory));
@@ -88,7 +94,7 @@ namespace OrdersManagement
                 UsersType result = (UsersType)serializer.Deserialize(fileStream);
                 return result;
             }
-            
+
         }
 
         private void BtUpdate_Click(object sender, EventArgs e)
@@ -110,20 +116,20 @@ namespace OrdersManagement
             log.Info("Update data to DB. Is update AliID: " + isUpdateAli.ToString() + ". Is update AliTrackingNumber: " + isUpdateTracking.ToString());
 
             dataGridView1.SelectedRows[0].Cells["AliId"].Value = tbAliId.Text;
-            if(!string.IsNullOrWhiteSpace(tbAliCashAmount.Text))
+            if (!string.IsNullOrWhiteSpace(tbAliCashAmount.Text))
                 dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value = tbAliCashAmount.Text;
             dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value = tbAliTrackNumber.Text;
             if (!string.IsNullOrWhiteSpace(tbRefund.Text))
                 dataGridView1.SelectedRows[0].Cells["Refund"].Value = tbRefund.Text;
 
-            if(isUpdateAli)
+            if (isUpdateAli)
                 dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Processed.ToString();
             if (isUpdateTracking)
                 dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Shipped.ToString();
             if (isUpdateRefund)
                 dataGridView1.SelectedRows[0].Cells["Status"].Value = Status.Refund.ToString();
             //Save data to DB
-            UpdateToDB(int.Parse(dataGridView1.SelectedRows[0].Cells["Id"].Value.ToString()),tbAliId.Text, tbAliCashAmount.Text, tbAliTrackNumber.Text, 
+            UpdateToDB(int.Parse(dataGridView1.SelectedRows[0].Cells["Id"].Value.ToString()), tbAliId.Text, tbAliCashAmount.Text, tbAliTrackNumber.Text,
                 tbRefund.Text, isUpdateAli, isUpdateTracking, isUpdateRefund);
         }
 
@@ -218,13 +224,16 @@ namespace OrdersManagement
                 //Confirm shipment for this order                
                 try
                 {
-                    string ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipment"].ToString();
-                    ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipmentCSS"].ToString();
+                    //Check have buy shipment or not ?
+                    string ConfirmShipment = "";
+                    int numberButton = int.Parse(ConfigurationManager.AppSettings["NoButtons"].ToString());
+                    if (firefoxDriver.FindElements(By.ClassName("a-button-input")).Count > numberButton)
+                        ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipmentInCaseBuyShipmentCSS"].ToString();
+                    else
+                        ConfirmShipment = ConfigurationManager.AppSettings["ConfirmShipmentCSS"].ToString();
                     //firefoxDriver.FindElement(By.XPath(ConfirmShipment)).Click();
                     firefoxDriver.FindElement(By.CssSelector(ConfirmShipment)).Click();
-
                     string ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2"].ToString();
-                    //ConfirmShipment2 = ConfigurationManager.AppSettings["ConfirmShipment2CSS"].ToString();
                     Thread.Sleep(threadDelay);
                     firefoxDriver.FindElement(By.XPath(ConfirmShipment2)).Click();
                     //firefoxDriver.FindElement(By.CssSelector(ConfirmShipment2)).Click();
@@ -236,7 +245,7 @@ namespace OrdersManagement
                 }
                 catch (Exception ex)
                 {
-                    log.Warn("Do not need to confirm shipment" +ex.ToString());
+                    log.Warn("Do not need to confirm shipment" + ex.ToString());
                 }
             }
 
@@ -248,10 +257,10 @@ namespace OrdersManagement
             dataGridView1.DataSource = LoadOrderFromDB(cbUsers.SelectedText.ToString()).Tables[0];
         }
 
-        private DataSet LoadOrderFromDB(string userName="")
+        private DataSet LoadOrderFromDB(string userName = "")
         {
             //Load data from DB for selected users
-            MySqlConnection conn;            
+            MySqlConnection conn;
             try
             {
                 conn = new MySqlConnection();
@@ -261,7 +270,7 @@ namespace OrdersManagement
                 using (MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn))
                 {
                     DataSet ds = new DataSet();
-                    adapter.Fill(ds);                    
+                    adapter.Fill(ds);
                     return ds;
                 }
             }
@@ -272,7 +281,7 @@ namespace OrdersManagement
             }
         }
 
-        private void UpdateToDB(int Id, string AliId, string AliCashAmount,string AliTrackingNumber, string Refund, bool isUpdateAli, bool isUpdateTracking, bool isUpdateRefund)
+        private void UpdateToDB(int Id, string AliId, string AliCashAmount, string AliTrackingNumber, string Refund, bool isUpdateAli, bool isUpdateTracking, bool isUpdateRefund)
         {
             log.Info("Save data to DB. Id, AliId, AliCashAmount, AliTrackingNumber, Refund: " + Id.ToString()
                 + ", " + AliId + ", " + AliCashAmount + ", " + AliTrackingNumber + ", " + Refund);
@@ -314,24 +323,24 @@ namespace OrdersManagement
             {
                 log.Error("Parsing number error. " + ex.ToString());
             }
-            
+
             cmd.Parameters.AddWithValue("@AliTrackingNumber", AliTrackingNumber.Trim());
             if (isUpdateTracking)
                 cmd.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             else
                 cmd.Parameters.AddWithValue("@AliTrackingDate", "0000-00-00 00:00:00");
-            
+
             cmd.Parameters.AddWithValue("@Id", Id);
             try
             {
                 cmd.ExecuteNonQuery();
 
                 //Update status
-                if(isUpdateAli || isUpdateTracking || isUpdateRefund)
+                if (isUpdateAli || isUpdateTracking || isUpdateRefund)
                 {
                     MySqlCommand newCmd = conn.CreateCommand();
                     newCmd.CommandText = "UPDATE Orders SET Status = @Status WHERE Id=@Id";
-                    newCmd.Parameters.AddWithValue("@Id", Id);                    
+                    newCmd.Parameters.AddWithValue("@Id", Id);
                     if (isUpdateRefund)
                         newCmd.Parameters.AddWithValue("@Status", Status.Refund.ToString());
                     else if (isUpdateTracking)
@@ -344,11 +353,11 @@ namespace OrdersManagement
                 cmd.Dispose();
                 conn.Dispose();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 log.Error("Save data to DB error. " + ex.ToString());
             }
-            
+
         }
         private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -356,18 +365,36 @@ namespace OrdersManagement
             tbAliCashAmount.Text = dataGridView1.SelectedRows[0].Cells["AliCashAmount"].Value.ToString();
             tbAliTrackNumber.Text = dataGridView1.SelectedRows[0].Cells["AliTrackingNumber"].Value.ToString();
             tbRefund.Text = dataGridView1.SelectedRows[0].Cells["Refund"].Value.ToString();
+
+            //Load images and link
+            DataTable data = GetItemsByOrderId(dataGridView1.SelectedRows[0].Cells["Id"].Value.ToString());
+            try
+            {
+                link1 = ConvertSkuToAliLink(data.Rows[0]["Sku"].ToString());
+                pictureBox1.LoadAsync(data.Rows[0]["Image"].ToString());
+                link2 = ConvertSkuToAliLink(data.Rows[1]["Sku"].ToString());
+                pictureBox2.LoadAsync(data.Rows[1]["Image"].ToString());
+                link3 = ConvertSkuToAliLink(data.Rows[2]["Sku"].ToString());
+                pictureBox3.LoadAsync(data.Rows[2]["Image"].ToString());
+                link4 = ConvertSkuToAliLink(data.Rows[3]["Sku"].ToString());
+                pictureBox4.LoadAsync(data.Rows[3]["Image"].ToString());
+            }
+            catch (Exception ex)
+            {
+                log.Warn("Loading image. Ex:" + ex.ToString());
+            }
         }
 
         private void SaveOrderToDB(List<AmzOrder> orders)
-        {            
+        {
             MySqlConnection conn = new MySqlConnection(connectionString);
             conn.Open();
-            
+
             foreach (AmzOrder order in orders)
             {
                 //Get map user account
                 string amzAccount = "";
-                foreach(var user in userMap.Users)
+                foreach (var user in userMap.Users)
                 {
                     if (user.FireFoxId == cbUsers.SelectedItem.ToString())
                     {
@@ -405,7 +432,7 @@ namespace OrdersManagement
                     newComm.Parameters.AddWithValue("@Asin", item.Asin);
                     newComm.Parameters.AddWithValue("@Sku", item.Sku.Replace("SKU: ", ""));
                     newComm.Parameters.AddWithValue("@Quantity", item.Quantity);
-                    newComm.Parameters.AddWithValue("@UnitPrice", decimal.Parse(item.UnitPrice.Remove(0,2), NumberStyles.Currency));
+                    newComm.Parameters.AddWithValue("@UnitPrice", decimal.Parse(item.UnitPrice.Remove(0, 2), NumberStyles.Currency));
                     newComm.Parameters.AddWithValue("@SubTotal", decimal.Parse(item.SubTotal.Remove(0, 2), NumberStyles.Currency));
 
                     newComm.ExecuteNonQuery();
@@ -428,7 +455,7 @@ namespace OrdersManagement
                 else
                 {
                     temp = sku.Split('-')[1];
-                    IdNumber = long.Parse(temp.Substring(0, 11));
+                    IdNumber = long.Parse(temp);
                 }
             }
             else
@@ -471,13 +498,13 @@ namespace OrdersManagement
                 driver.Navigate().GoToUrl("https://trade.aliexpress.com");
                 Thread.Sleep(threadDelay);
 
-                IWebElement orderId = driver.FindElement(By.Id("order-no"));             
+                IWebElement orderId = driver.FindElement(By.Id("order-no"));
                 orderId.SendKeys(row["AliId"].ToString());
                 driver.FindElement(By.Id("search-btn")).Click();
 
                 string AliStatusXpath = ConfigurationManager.AppSettings["AliStatusXPath"];
                 string status = driver.FindElement(By.XPath(AliStatusXpath)).Text;
-                if(status == "Awaiting delivery")
+                if (status == "Awaiting delivery")
                 {
                     string AliOrderDetail = ConfigurationManager.AppSettings["AliOrderDetail"];
                     driver.Navigate().GoToUrl(AliOrderDetail + row["AliId"].ToString());
@@ -497,7 +524,7 @@ namespace OrdersManagement
             dataGridView1.DataSource = LoadOrderFromDB().Tables[0];
         }
 
-        private void SaveTrackingNumberToDB(Dictionary<string,string> trackingList)
+        private void SaveTrackingNumberToDB(Dictionary<string, string> trackingList)
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
             conn.Open();
@@ -520,7 +547,7 @@ namespace OrdersManagement
         }
 
         private void BtnFillTracking_Click(object sender, EventArgs e)
-        {            
+        {
             //Get map user account
             string amzAccount = "";
             foreach (var user in userMap.Users)
@@ -533,7 +560,7 @@ namespace OrdersManagement
             }
 
             //Get order which status equal: Shipped            
-            var strExpr = "Status = 'Shipped' AND AccountId = '"+ amzAccount +"'";
+            var strExpr = "Status = 'Shipped' AND AccountId = '" + amzAccount + "'";
             var dv = LoadOrderFromDB().Tables[0].DefaultView;
             dv.RowFilter = strExpr;
 
@@ -542,7 +569,7 @@ namespace OrdersManagement
             List<string> Ids = new List<string>();
             foreach (DataRow row in dv.ToTable().Rows)
             {
-                firefoxDriver.Navigate().GoToUrl(AmzOrderURL+ row["AmzOrderId"].ToString());
+                firefoxDriver.Navigate().GoToUrl(AmzOrderURL + row["AmzOrderId"].ToString());
                 Thread.Sleep(threadDelay);
                 string EditShipmentCSS = ConfigurationManager.AppSettings["EditShipmentCSS"].ToString();
                 firefoxDriver.FindElement(By.CssSelector(EditShipmentCSS)).Click();
@@ -586,54 +613,103 @@ namespace OrdersManagement
             conn.Close();
             conn.Dispose();
         }
-    }
 
-    [XmlRoot("Users")]
-    public class UsersType
-    {
-        [XmlElement("User")]
-        public List<UserType> Users { get; set; }
-    }
-
-    public class UserType
-    {
-        [XmlAttribute("FireFoxId")]
-        public string FireFoxId { get; set; }
-        [XmlAttribute("AmzUserId")]
-        public string AmzUserId { get; set; }
-    }
-
-    public enum Status
-    {
-        NewOrder=0,
-        Processed=1,
-        Shipped=2,
-        Finished=3,
-        Refund=4
-    }
-
-    public class AmzOrder
-    {
-        public string OrderId;
-        public string PurchasedDate;
-        public string ShipAddress;
-        public string ShipPhone;
-        public string Country;
-        public List<AmzItem> Items;
-
-        public AmzOrder()
+        private DataTable GetItemsByOrderId(string orderId)
         {
-            Items = new List<AmzItem>();
+            //Load data from DB for selected users
+            using (MySqlConnection conn = new MySqlConnection())
+            {
+                try
+                {
+                    conn.ConnectionString = connectionString;
+                    conn.Open();
+                    string query = "SELECT * FROM Items WHERE OrderId = '" + orderId + "'";
+                    using (MySqlDataAdapter adapter = new MySqlDataAdapter(query, conn))
+                    {
+                        DataSet ds = new DataSet();
+                        adapter.Fill(ds);
+                        return ds.Tables[0];
+                    }
+                }
+                catch (MySql.Data.MySqlClient.MySqlException ex)
+                {
+                    log.Info("Cannot load data from DB. " + ex.Message);
+                    return null;
+                }
+            }
         }
-    }
 
-    public class AmzItem
-    {
-        public string ImageUrl;
-        public string Asin;
-        public string Sku;
-        public string UnitPrice;
-        public string SubTotal;
-        public string Quantity;
+        [XmlRoot("Users")]
+        public class UsersType
+        {
+            [XmlElement("User")]
+            public List<UserType> Users { get; set; }
+        }
+
+        public class UserType
+        {
+            [XmlAttribute("FireFoxId")]
+            public string FireFoxId { get; set; }
+            [XmlAttribute("AmzUserId")]
+            public string AmzUserId { get; set; }
+        }
+
+        public enum Status
+        {
+            NewOrder = 0,
+            Processed = 1,
+            Shipped = 2,
+            Finished = 3,
+            Refund = 4
+        }
+
+        public class AmzOrder
+        {
+            public string OrderId;
+            public string PurchasedDate;
+            public string ShipAddress;
+            public string ShipPhone;
+            public string Country;
+            public List<AmzItem> Items;
+
+            public AmzOrder()
+            {
+                Items = new List<AmzItem>();
+            }
+        }
+
+        public class AmzItem
+        {
+            public string ImageUrl;
+            public string Asin;
+            public string Sku;
+            public string UnitPrice;
+            public string SubTotal;
+            public string Quantity;
+        }
+
+        private void PictureBox1_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(link1) && !string.IsNullOrEmpty(link1))
+                Process.Start(link1);
+        }
+
+        private void PictureBox2_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(link2) && !string.IsNullOrEmpty(link2))
+                Process.Start(link2);
+        }
+
+        private void PictureBox3_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(link3) && !string.IsNullOrEmpty(link3))
+                Process.Start(link3);
+        }
+
+        private void PictureBox4_Click(object sender, EventArgs e)
+        {
+            if (!string.IsNullOrWhiteSpace(link4) && !string.IsNullOrEmpty(link4))
+                Process.Start(link4);
+        }
     }
 }
