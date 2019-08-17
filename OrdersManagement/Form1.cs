@@ -39,12 +39,17 @@ namespace OrdersManagement
         string link4 = "";
 
         DataTable ordersTable;
+        DataTable skuTable;
         private BindingSource orderBindingSource = new BindingSource();
         private MySqlDataAdapter orderDataAdapter = new MySqlDataAdapter();
         private BindingSource itemBindingSource = new BindingSource();
         private MySqlDataAdapter itemDataAdapter = new MySqlDataAdapter();
         private BindingSource AliBindingSource = new BindingSource();
         private MySqlDataAdapter AliDataAdapter = new MySqlDataAdapter();
+
+        private BindingSource SkuBindingSource = new BindingSource();
+        private MySqlDataAdapter SkuDataAdapter = new MySqlDataAdapter();
+
 
         #endregion
         public Form1()
@@ -188,7 +193,24 @@ namespace OrdersManagement
             {
                 lbAddress.Items.Add(add);
             }
-            
+
+            string[] phones = dgvOrders.SelectedRows[0].Cells["ShipPhone"].Value.ToString().Split('\n');
+            foreach(var phone in phones)
+            {
+                if (phone.Contains("ext"))
+                {
+                    string[] exts = phone.Split(new string[] { "ext" }, StringSplitOptions.None);
+
+                    exts[0] = exts[0].Replace("-", "").Replace(" ", "");
+                    exts[1] = exts[1].Replace("-", "").Replace(" ", "");
+                    
+                    lbAddress.Items.Add(exts[0]);
+                    lbAddress.Items.Add("ext " + exts[1]);
+                }
+                else
+                    lbAddress.Items.Add(phone.Replace("-", "").Replace(" ", ""));
+            }
+
             //Load images and link
             GetItemsByOrderId(dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
             dgvItems.DataSource = itemBindingSource;
@@ -271,6 +293,11 @@ namespace OrdersManagement
 
         private string ConvertSkuToAliLink(string sku)
         {
+            foreach (DataRow row in skuTable.Rows)
+            {
+                if (row["Sku"].ToString() == sku)
+                    return row["Link"].ToString();
+            }
             string result = "https://www.aliexpress.com/item/";
             long IdNumber;
             if (sku.Contains("-"))
@@ -300,7 +327,6 @@ namespace OrdersManagement
             return result;
         }
 
-        //@@TODO: change to AliTracks Table
         private void SaveTrackingNumberToDB(Dictionary<string, string> trackingList)
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
@@ -385,7 +411,6 @@ namespace OrdersManagement
                 }
             }
         }
-
 
         private void PictureBox1_Click(object sender, EventArgs e)
         {
@@ -549,6 +574,7 @@ namespace OrdersManagement
             //Refress datagridview
             //dgvOrders.DataSource = null;
             //dgvOrders.DataSource = ordersTable;
+            MessageBox.Show("Finish get Amazon Orders");
         }
 
         private void GetAliTrackingNumberToolStripMenuItem_Click(object sender, EventArgs e)
@@ -602,6 +628,8 @@ namespace OrdersManagement
             }
             //Save tracking number to DB
             SaveTrackingNumberToDB(AliTrackingList);
+
+            MessageBox.Show("Finish get Ali Tracking Number");
         }
 
         private void FillTrackingNumberToolStripMenuItem_Click(object sender, EventArgs e)
@@ -645,6 +673,8 @@ namespace OrdersManagement
 
             //Update status to Finished
             UpdateStatusToFinished(Ids);
+
+            MessageBox.Show("Finish Fill Tracking Number");
         }
 
         private void LoadOrdersToolStripMenuItem_Click(object sender, EventArgs e)
@@ -682,7 +712,56 @@ namespace OrdersManagement
 
         private void BtnSearch_Click(object sender, EventArgs e)
         {
+            //Load data from DB for selected users
+            MySqlConnection conn;
+            try
+            {
+                conn = new MySqlConnection();
+                conn.ConnectionString = connectionString;
+                conn.Open();
+                string query = "SELECT * FROM Orders WHERE 1=1 ";
 
+                //Add filter condition:
+                //Trade date: less than
+                if (!string.IsNullOrEmpty(tbSearchTradeDate.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchTradeDate.Text.ToString()))
+                {
+                    query = "SELECT Orders.* FROM Orders INNER JOIN AliTracks ON Orders.Id = AliTracks.OrderId WHERE ";
+                    DateTime searchDate = DateTime.Now;
+                    int range = 0 - int.Parse(tbSearchTradeDate.Text.ToString());
+                    searchDate = searchDate.AddDays(range);
+                    query += " AliTracks.AliTrackingDate >='" + searchDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                }
+
+                //Status
+                if (cbbStatus.SelectedIndex >-1)
+                    query += " AND Orders.Status = '" + cbbStatus.SelectedItem.ToString() + "'";
+                //Country
+                if (cbbCountry.SelectedIndex > -1)
+                    query += " AND Orders.Country = '" + cbbCountry.SelectedItem.ToString() + "'";
+                //AccountId
+                if (cbbAccount.SelectedIndex > -1)
+                    query += " AND Orders.AccountId = '" + cbbAccount.SelectedItem.ToString() + "'";
+                //Note: have or not
+                if (cbbNote.SelectedIndex > -1)
+                {
+                    if(cbbNote.SelectedItem.ToString() == "Yes")
+                        query += " AND Orders.Note is not null";
+                    else
+                        query += " AND Orders.Note is null";
+                }
+                //Amz Order Id: like
+                if (!string.IsNullOrEmpty(tbSearchOrderId.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchOrderId.Text.ToString()))
+                    query += " AND Orders.AmzOrderId like '%" + tbSearchOrderId.Text.ToString() + "%'";
+
+                orderDataAdapter = new MySqlDataAdapter(query, conn);
+                ordersTable = new DataTable();
+                orderDataAdapter.Fill(ordersTable);
+                orderBindingSource.DataSource = ordersTable;
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                log.Info("Cannot load data from DB. " + ex.Message);
+            }
         }
 
 
@@ -753,6 +832,106 @@ namespace OrdersManagement
             orderDataAdapter.Update((DataTable)orderBindingSource.DataSource);
             itemDataAdapter.Update((DataTable)itemBindingSource.DataSource);
             AliDataAdapter.Update((DataTable)AliBindingSource.DataSource);
+            SkuDataAdapter.Update((DataTable)SkuBindingSource.DataSource);
+        }
+
+        private void BtnAddAliInfo_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "INSERT INTO AliTracks(OrderId,AliId, AliDate, AliCashAmount) " +
+                    "VALUES(@OrderId, @AliId, @AliDate,@AliCashAmount)";
+
+                comm.Parameters.AddWithValue("@OrderId", dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@AliId", tbAliId.Text.ToString());
+                comm.Parameters.AddWithValue("@AliDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                comm.Parameters.AddWithValue("@AliCashAmount", tbAliCashAmount.Text);
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+
+                //Update Order Status
+                MySqlCommand newCmd = conn.CreateCommand();
+                newCmd.CommandText = "UPDATE Orders SET Status = @Status WHERE Id=@OrderId";
+                newCmd.Parameters.AddWithValue("@OrderId", dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+                newCmd.Parameters.AddWithValue("@Status", Status.Processed.ToString());
+                newCmd.ExecuteNonQuery();
+
+                conn.Close();
+                newCmd.Dispose();
+                conn.Dispose();
+            }
+            catch(Exception ex)
+            {
+                log.Error("Add AliId to DB error. " + ex.ToString());
+            }
+
+            GetOrdersFromDB();
+        }
+
+        private void BtResetSearch_Click(object sender, EventArgs e)
+        {
+            cbbStatus.SelectedIndex = -1;
+            cbbAccount.SelectedIndex = -1;
+            cbbCountry.SelectedIndex = -1;
+            cbbNote.SelectedIndex = -1;
+
+            tbSearchOrderId.Text = "";
+            tbSearchTradeDate.Text = "";
+
+            BtnSearch_Click(null,null);
+        }
+
+        private void LoadSkuToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //Load data from DB for selected users
+            MySqlConnection conn;
+            try
+            {
+                conn = new MySqlConnection();
+                conn.ConnectionString = connectionString;
+                conn.Open();
+                string query = "SELECT * FROM SkuToLink";
+                SkuDataAdapter = new MySqlDataAdapter(query, conn);
+                skuTable = new DataTable();
+                SkuDataAdapter.Fill(skuTable);
+                SkuBindingSource.DataSource = skuTable;
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                log.Info("Cannot load Sku from DB. " + ex.Message);
+            }
+        }
+
+        private void btAddSkuLink_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "INSERT INTO SkuToLink(Sku,Link) " +
+                    "VALUES(@Sku, @Link)";
+
+                comm.Parameters.AddWithValue("@Sku", dgvItems.SelectedRows[0].Cells["Sku"].Value.ToString());
+                comm.Parameters.AddWithValue("@Link", tbSkuLink.Text.ToString());
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+                conn.Close();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Add AliId to DB error. " + ex.ToString());
+            }
         }
     }
 }
