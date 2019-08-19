@@ -84,6 +84,8 @@ namespace OrdersManagement
 
             cbbNote.Items.Add("Yes");
             cbbNote.Items.Add("No");
+
+            LoadSkuToolStripMenuItem_Click(null, null);
         }
 
         private void GetOrdersFromDB()
@@ -293,6 +295,7 @@ namespace OrdersManagement
 
         private string ConvertSkuToAliLink(string sku)
         {
+            if(skuTable != null)
             foreach (DataRow row in skuTable.Rows)
             {
                 if (row["Sku"].ToString() == sku)
@@ -327,22 +330,28 @@ namespace OrdersManagement
             return result;
         }
 
-        private void SaveTrackingNumberToDB(Dictionary<string, string> trackingList)
+        private void SaveTrackingNumberToDB(List<TrackingInfos> infors)
         {
             MySqlConnection conn = new MySqlConnection(connectionString);
             conn.Open();
 
-            foreach (KeyValuePair<string, string> entry in trackingList)
+            foreach (var infor in infors)
             {
                 MySqlCommand comm = conn.CreateCommand();
-                comm.CommandText = "UPDATE AliTracks SET AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate, " +
-                    " Status = @Status WHERE Id=@Id";
+                comm.CommandText = "UPDATE AliTracks SET AliCashAmount=@AliCashAmount,AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate WHERE Id=@Id";
 
-                comm.Parameters.AddWithValue("@Id", entry.Key);
-                comm.Parameters.AddWithValue("@AliTrackingNumber", entry.Value.Trim());
+                comm.Parameters.AddWithValue("@Id", infor.TrackingId);
+                comm.Parameters.AddWithValue("@AliTrackingNumber", infor.TrackingNumber);
                 comm.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                comm.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                comm.Parameters.AddWithValue("@AliCashAmount", infor.AliAmount);                
                 comm.ExecuteNonQuery();
+
+                MySqlCommand orderComm = conn.CreateCommand();
+                orderComm.CommandText = "UPDATE Orders SET Status=@Status WHERE Id=@Id";
+
+                orderComm.Parameters.AddWithValue("@Id", infor.OrderId);
+                orderComm.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                orderComm.ExecuteNonQuery();
             }
 
             conn.Close();
@@ -575,14 +584,12 @@ namespace OrdersManagement
             //dgvOrders.DataSource = null;
             //dgvOrders.DataSource = ordersTable;
             MessageBox.Show("Finish get Amazon Orders");
+            GetOrdersFromDB();
         }
 
         private void GetAliTrackingNumberToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //Get all order in status: Processed
-            var strExpr = "Status = 'Processed'";
-            var dv = ordersTable.DefaultView;
-            dv.RowFilter = strExpr;
+            DataTable trackingInfo = GetTrackingInfo("Processed");
 
             IWebDriver driver = new FirefoxDriver();
             driver.Navigate().GoToUrl("https://trade.aliexpress.com");
@@ -604,7 +611,9 @@ namespace OrdersManagement
             Thread.Sleep(threadDelay);
 
             Dictionary<string, string> AliTrackingList = new Dictionary<string, string>();
-            foreach (DataRow row in dv.ToTable().Rows)
+            Dictionary<string, decimal> AliTrackingListAmount = new Dictionary<string, decimal>();
+            List<TrackingInfos> trackingList = new List<TrackingInfos>();
+            foreach (DataRow row in trackingInfo.Rows)
             {
                 driver.Navigate().GoToUrl("https://trade.aliexpress.com");
                 Thread.Sleep(threadDelay);
@@ -617,21 +626,31 @@ namespace OrdersManagement
                 string status = driver.FindElement(By.XPath(AliStatusXpath)).Text;
                 if (status == "Awaiting delivery")
                 {
+                    TrackingInfos infor = new TrackingInfos();
+                    infor.OrderId = int.Parse(row["OrderId"].ToString());
+                    infor.TrackingId = int.Parse(row["Id"].ToString());
+
+                    string AliTotalAmountXpath = ConfigurationManager.AppSettings["AliTotalAmount"];                    
+                    string totalAmountString = driver.FindElement(By.XPath(AliTotalAmountXpath)).Text;
+                    infor.AliAmount = decimal.Parse(totalAmountString.Remove(0, 2), NumberStyles.Currency);
+
                     string AliOrderDetail = ConfigurationManager.AppSettings["AliOrderDetail"];
                     driver.Navigate().GoToUrl(AliOrderDetail + row["AliId"].ToString());
                     Thread.Sleep(threadDelay);
 
                     string AliTrackingNumberXpath = ConfigurationManager.AppSettings["AliTrackingNumberXpath"];
-                    string AliTrackingNumber = driver.FindElement(By.XPath(AliTrackingNumberXpath)).Text;
-                    AliTrackingList.Add(row["Id"].ToString(), AliTrackingNumber);
+                    infor.TrackingNumber = driver.FindElement(By.XPath(AliTrackingNumberXpath)).Text;
+                    trackingList.Add(infor);
                 }
             }
             //Save tracking number to DB
-            SaveTrackingNumberToDB(AliTrackingList);
+            SaveTrackingNumberToDB(trackingList);
 
             MessageBox.Show("Finish get Ali Tracking Number");
+            GetOrdersFromDB();
         }
 
+        //@@TODO: change table item
         private void FillTrackingNumberToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //Get map user account
@@ -675,6 +694,7 @@ namespace OrdersManagement
             UpdateStatusToFinished(Ids);
 
             MessageBox.Show("Finish Fill Tracking Number");
+            GetOrdersFromDB();
         }
 
         private void LoadOrdersToolStripMenuItem_Click(object sender, EventArgs e)
@@ -816,6 +836,14 @@ namespace OrdersManagement
             public string Quantity;
         }
 
+        public struct TrackingInfos
+        {
+            public int OrderId;
+            public int TrackingId;
+            public decimal AliAmount;
+            public string TrackingNumber;
+        }
+
         private UsersType LoadUsers()
         {
             XmlSerializer serializer = new XmlSerializer(typeof(UsersType));
@@ -870,8 +898,6 @@ namespace OrdersManagement
             {
                 log.Error("Add AliId to DB error. " + ex.ToString());
             }
-
-            GetOrdersFromDB();
         }
 
         private void BtResetSearch_Click(object sender, EventArgs e)
@@ -931,6 +957,32 @@ namespace OrdersManagement
             catch (Exception ex)
             {
                 log.Error("Add AliId to DB error. " + ex.ToString());
+            }
+        }
+
+        private DataTable GetTrackingInfo(string status, string userName = "")
+        {
+            //Load data from DB for selected users
+            MySqlConnection conn;
+            try
+            {
+                conn = new MySqlConnection();
+                conn.ConnectionString = connectionString;
+                conn.Open();
+                string query = "SELECT * FROM AliTracks INNER JOIN Orders ON AliTracks.OrderId = Orders.Id WHERE Orders.Status = '" + status + "'";
+                if(!string.IsNullOrEmpty(userName) && !string.IsNullOrWhiteSpace(userName))
+                {
+                    query += " AND Orders.AccountId = '" + userName + "'";
+                }
+                MySqlDataAdapter trackingDataAdapter = new MySqlDataAdapter(query, conn);
+                DataTable trackingTable = new DataTable();
+                trackingDataAdapter.Fill(trackingTable);
+                return trackingTable;
+            }
+            catch (MySql.Data.MySqlClient.MySqlException ex)
+            {
+                log.Info("Cannot load Tracking from DB. " + ex.Message);
+                return null;
             }
         }
     }

@@ -39,6 +39,7 @@
             this.loadDataToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadOrdersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.loadProfilesToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.loadSkuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getDataToDBToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getAmazonOrdersToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.getAliTrackingNumberToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -70,7 +71,6 @@
             this.tbSkuLink = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btAddSkuLink = new System.Windows.Forms.Button();
-            this.loadSkuToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
@@ -176,7 +176,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(10, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1764, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1745, 24);
             this.menuStrip1.TabIndex = 27;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -193,16 +193,23 @@
             // loadOrdersToolStripMenuItem
             // 
             this.loadOrdersToolStripMenuItem.Name = "loadOrdersToolStripMenuItem";
-            this.loadOrdersToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadOrdersToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.loadOrdersToolStripMenuItem.Text = "Load Orders";
             this.loadOrdersToolStripMenuItem.Click += new System.EventHandler(this.LoadOrdersToolStripMenuItem_Click);
             // 
             // loadProfilesToolStripMenuItem
             // 
             this.loadProfilesToolStripMenuItem.Name = "loadProfilesToolStripMenuItem";
-            this.loadProfilesToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
+            this.loadProfilesToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
             this.loadProfilesToolStripMenuItem.Text = "Load Profiles";
             this.loadProfilesToolStripMenuItem.Click += new System.EventHandler(this.LoadProfilesToolStripMenuItem_Click);
+            // 
+            // loadSkuToolStripMenuItem
+            // 
+            this.loadSkuToolStripMenuItem.Name = "loadSkuToolStripMenuItem";
+            this.loadSkuToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.loadSkuToolStripMenuItem.Text = "Load Sku";
+            this.loadSkuToolStripMenuItem.Click += new System.EventHandler(this.LoadSkuToolStripMenuItem_Click);
             // 
             // getDataToDBToolStripMenuItem
             // 
@@ -518,18 +525,12 @@
             this.btAddSkuLink.UseVisualStyleBackColor = true;
             this.btAddSkuLink.Click += new System.EventHandler(this.btAddSkuLink_Click);
             // 
-            // loadSkuToolStripMenuItem
-            // 
-            this.loadSkuToolStripMenuItem.Name = "loadSkuToolStripMenuItem";
-            this.loadSkuToolStripMenuItem.Size = new System.Drawing.Size(180, 22);
-            this.loadSkuToolStripMenuItem.Text = "Load Sku";
-            this.loadSkuToolStripMenuItem.Click += new System.EventHandler(this.LoadSkuToolStripMenuItem_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1764, 805);
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(1745, 805);
             this.Controls.Add(this.btAddSkuLink);
             this.Controls.Add(this.tbSkuLink);
             this.Controls.Add(this.label3);
