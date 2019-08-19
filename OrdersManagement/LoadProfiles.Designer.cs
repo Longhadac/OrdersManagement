@@ -34,7 +34,6 @@
             // 
             // cbUsers
             // 
-            this.cbUsers.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
             this.cbUsers.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbUsers.FormattingEnabled = true;
             this.cbUsers.Location = new System.Drawing.Point(11, 34);
@@ -42,6 +41,7 @@
             this.cbUsers.Name = "cbUsers";
             this.cbUsers.Size = new System.Drawing.Size(241, 28);
             this.cbUsers.TabIndex = 2;
+            this.cbUsers.TextChanged += new System.EventHandler(this.CbUsers_TextChanged);
             // 
             // btnLoadProfile
             // 
