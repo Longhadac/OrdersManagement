@@ -36,7 +36,6 @@ namespace OrdersManagement
         string link1 = "";
         string link2 = "";
         string link3 = "";
-        string link4 = "";
 
         DataTable ordersTable;
         DataTable skuTable;
@@ -62,10 +61,12 @@ namespace OrdersManagement
             log.Info("Start the program");
 
             userMap = LoadUsers();
+            cbbStatus.Items.Add("ALL");
             foreach (var status in Enum.GetNames(typeof(Status)).ToList())
             {
                 cbbStatus.Items.Add(status);
             }
+            cbbAccount.Items.Add("ALL");
             foreach (var user in userMap.Users)
             {
                 cbbAccount.Items.Add(user.AmzUserId);
@@ -78,10 +79,12 @@ namespace OrdersManagement
             log.Info("Load order to view");
             GetOrdersFromDB();
 
+            cbbCountry.Items.Add("ALL");
             var x = (from r in ordersTable.AsEnumerable()
                      select r["Country"]).Distinct().ToArray();
             cbbCountry.Items.AddRange(x);
 
+            cbbNote.Items.Add("ALL");
             cbbNote.Items.Add("Yes");
             cbbNote.Items.Add("No");
 
@@ -111,14 +114,22 @@ namespace OrdersManagement
 
         private void DataGridView1_CellClick(object sender, DataGridViewCellEventArgs e)
         {
+            try
+            {
+                Clipboard.SetText(dgvOrders.CurrentCell.Value.ToString());
+            }
+            catch { }
+
             lbAddress.Items.Clear();
-            string[] address = dgvOrders.SelectedRows[0].Cells["ShipAddress"].Value.ToString().Split('\n');
+            int OrderSelectedRow = dgvOrders.CurrentCell.RowIndex;
+            string[] address = dgvOrders.Rows[OrderSelectedRow].Cells["ShipAddress"].Value.ToString().Split('\n');
+
             foreach (var add in address)
             {
                 lbAddress.Items.Add(add);
             }
 
-            string[] phones = dgvOrders.SelectedRows[0].Cells["ShipPhone"].Value.ToString().Split('\n');
+            string[] phones = dgvOrders.Rows[OrderSelectedRow].Cells["ShipPhone"].Value.ToString().Split('\n');
             foreach (var phone in phones)
             {
                 if (phone.Contains("ext"))
@@ -136,9 +147,9 @@ namespace OrdersManagement
             }
 
             //Load images and link
-            GetItemsByOrderId(dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+            GetItemsByOrderId(dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
             dgvItems.DataSource = itemBindingSource;
-            GetAliTrackByOrderId(dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+            GetAliTrackByOrderId(dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
             dgvAli.DataSource = AliBindingSource;
             try
             {
@@ -146,10 +157,8 @@ namespace OrdersManagement
                 pictureBox1.LoadAsync(dgvItems.Rows[0].Cells["Image"].Value.ToString());
                 link2 = ConvertSkuToAliLink(dgvItems.Rows[1].Cells["Sku"].Value.ToString());
                 pictureBox2.LoadAsync(dgvItems.Rows[1].Cells["Image"].Value.ToString());
-                link3 = ConvertSkuToAliLink(dgvItems.Rows[2].Cells["Sku"].Value.ToString());
-                pictureBox3.LoadAsync(dgvItems.Rows[2].Cells["Image"].Value.ToString());
-                link4 = ConvertSkuToAliLink(dgvItems.Rows[3].Cells["Sku"].Value.ToString());
-                pictureBox4.LoadAsync(dgvItems.Rows[3].Cells["Image"].Value.ToString());
+                //link3 = ConvertSkuToAliLink(dgvItems.Rows[2].Cells["Sku"].Value.ToString());
+                //pictureBox3.LoadAsync(dgvItems.Rows[2].Cells["Image"].Value.ToString());
             }
             catch (Exception ex)
             {
@@ -346,25 +355,19 @@ namespace OrdersManagement
         private void PictureBox1_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(link1) && !string.IsNullOrEmpty(link1))
-                Process.Start(link1);
+                Process.Start("chrome.exe",link1);
         }
 
         private void PictureBox2_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(link2) && !string.IsNullOrEmpty(link2))
-                Process.Start(link2);
+                Process.Start("chrome.exe",link2);
         }
 
         private void PictureBox3_Click(object sender, EventArgs e)
         {
             if (!string.IsNullOrWhiteSpace(link3) && !string.IsNullOrEmpty(link3))
-                Process.Start(link3);
-        }
-
-        private void PictureBox4_Click(object sender, EventArgs e)
-        {
-            if (!string.IsNullOrWhiteSpace(link4) && !string.IsNullOrEmpty(link4))
-                Process.Start(link4);
+                Process.Start("chrome.exe",link3);
         }
 
         private void LbAddress_SelectedIndexChanged(object sender, EventArgs e)
@@ -673,16 +676,16 @@ namespace OrdersManagement
                 }
 
                 //Status
-                if (cbbStatus.SelectedIndex > -1)
+                if (cbbStatus.SelectedIndex > -1 && cbbStatus.SelectedItem.ToString()!= "ALL")
                     query += " AND orders.Status = '" + cbbStatus.SelectedItem.ToString() + "'";
                 //Country
-                if (cbbCountry.SelectedIndex > -1)
+                if (cbbCountry.SelectedIndex > -1 && cbbCountry.SelectedItem.ToString() != "ALL")
                     query += " AND orders.Country = '" + cbbCountry.SelectedItem.ToString() + "'";
                 //AccountId
-                if (cbbAccount.SelectedIndex > -1)
+                if (cbbAccount.SelectedIndex > -1 && cbbAccount.SelectedItem.ToString() != "ALL")
                     query += " AND orders.AccountId = '" + cbbAccount.SelectedItem.ToString() + "'";
                 //Note: have or not
-                if (cbbNote.SelectedIndex > -1)
+                if (cbbNote.SelectedIndex > -1 && cbbNote.SelectedItem.ToString() != "ALL")
                 {
                     if (cbbNote.SelectedItem.ToString() == "Yes")
                         query += " AND orders.Note is not null";
@@ -775,16 +778,10 @@ namespace OrdersManagement
         }
         #endregion
 
-        private void BtnSubmit_Click(object sender, EventArgs e)
-        {
-            orderDataAdapter.Update((DataTable)orderBindingSource.DataSource);
-            itemDataAdapter.Update((DataTable)itemBindingSource.DataSource);
-            AliDataAdapter.Update((DataTable)AliBindingSource.DataSource);
-            SkuDataAdapter.Update((DataTable)SkuBindingSource.DataSource);
-        }
 
         private void BtnAddAliInfo_Click(object sender, EventArgs e)
         {
+            int OrderSelectedRow = dgvOrders.CurrentCell.RowIndex;
             try
             {
                 //Add ali tracking info
@@ -792,13 +789,12 @@ namespace OrdersManagement
                 conn.Open();
 
                 MySqlCommand comm = conn.CreateCommand();
-                comm.CommandText = "INSERT INTO alitracks(OrderId,AliId, AliDate, AliCashAmount) " +
-                    "VALUES(@OrderId, @AliId, @AliDate,@AliCashAmount)";
+                comm.CommandText = "INSERT INTO alitracks(OrderId,AliId, AliDate) " +
+                    "VALUES(@OrderId, @AliId, @AliDate)";
 
-                comm.Parameters.AddWithValue("@OrderId", dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@OrderId", dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
                 comm.Parameters.AddWithValue("@AliId", tbAliId.Text.ToString());
                 comm.Parameters.AddWithValue("@AliDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                comm.Parameters.AddWithValue("@AliCashAmount", tbAliCashAmount.Text);
 
                 comm.ExecuteNonQuery();
                 comm.Dispose();
@@ -806,7 +802,7 @@ namespace OrdersManagement
                 //Update Order Status
                 MySqlCommand newCmd = conn.CreateCommand();
                 newCmd.CommandText = "UPDATE orders SET status = @Status WHERE Id=@OrderId";
-                newCmd.Parameters.AddWithValue("@OrderId", dgvOrders.SelectedRows[0].Cells["Id"].Value.ToString());
+                newCmd.Parameters.AddWithValue("@OrderId", dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
                 newCmd.Parameters.AddWithValue("@Status", Status.Processed.ToString());
                 newCmd.ExecuteNonQuery();
 
@@ -856,6 +852,7 @@ namespace OrdersManagement
 
         private void btAddSkuLink_Click(object sender, EventArgs e)
         {
+            int ItemSelectedRow = dgvItems.CurrentCell.RowIndex;
             try
             {
                 //Add ali tracking info
@@ -866,7 +863,7 @@ namespace OrdersManagement
                 comm.CommandText = "INSERT INTO skuToLink(Sku,Link) " +
                     "VALUES(@Sku, @Link)";
 
-                comm.Parameters.AddWithValue("@Sku", dgvItems.SelectedRows[0].Cells["Sku"].Value.ToString());
+                comm.Parameters.AddWithValue("@Sku", dgvItems.Rows[ItemSelectedRow].Cells["Sku"].Value.ToString());
                 comm.Parameters.AddWithValue("@Link", tbSkuLink.Text.ToString());
 
                 comm.ExecuteNonQuery();
@@ -903,6 +900,205 @@ namespace OrdersManagement
             {
                 log.Info("Cannot load Tracking from DB. " + ex.Message);
                 return null;
+            }
+        }
+
+        private void DgvItems_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(dgvItems.CurrentCell.Value.ToString());
+            }
+            catch { }
+        }
+
+        private void DgvAli_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(dgvAli.CurrentCell.Value.ToString());
+            }
+            catch { }
+        }
+
+        private void DgvSkuToLink_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                Clipboard.SetText(dgvSkuToLink.CurrentCell.Value.ToString());
+            }
+            catch { }
+        }
+
+        private void BtUpdateRefund_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int OrderSelectedRow = dgvOrders.CurrentCell.RowIndex;
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE orders SET Refund = @Refund, Status = @Status WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@Refund", decimal.Parse(tbRefund.Text));
+                comm.Parameters.AddWithValue("@Status", Status.Refund.ToString());
+                comm.ExecuteNonQuery();
+
+                conn.Close();
+                conn.Dispose();
+            }
+            catch(Exception ex)
+            {
+                log.Error("Update Refund error. " + ex.ToString());
+                MessageBox.Show("Cannot update refund value");
+            }
+        }
+
+        private void BtnUpdateNote_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                int OrderSelectedRow = dgvOrders.CurrentCell.RowIndex;
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE orders SET Note = @Note WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvOrders.Rows[OrderSelectedRow].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@Note", tbNote.Text);
+                comm.ExecuteNonQuery();
+
+                conn.Close();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Update Note error. " + ex.ToString());
+                MessageBox.Show("Cannot update note.");
+            }
+        }
+
+        private void BtnUpdateAliId_Click(object sender, EventArgs e)
+        {
+            int AliSelectedRow = dgvAli.CurrentCell.RowIndex;
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE alitracks SET AliId=@AliId, AliDate=@AliDate WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvAli.Rows[AliSelectedRow].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@AliId", tbAliId.Text.ToString());
+                comm.Parameters.AddWithValue("@AliDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+
+                conn.Close();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Update AliId error. " + ex.ToString());
+                MessageBox.Show("Cannot update AliId value");
+            }
+        }
+
+        private void BtUpdateAliTrackingNumber_Click(object sender, EventArgs e)
+        {
+            int AliSelectedRow = dgvAli.CurrentCell.RowIndex;            
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE alitracks SET AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvAli.Rows[AliSelectedRow].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@AliTrackingNumber", tbAliId.Text.ToString());
+                comm.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+
+                //Update Order Status
+                MySqlCommand newCmd = conn.CreateCommand();
+                newCmd.CommandText = "UPDATE orders SET status = @Status WHERE Id=@OrderId";
+                newCmd.Parameters.AddWithValue("@OrderId", dgvAli.Rows[AliSelectedRow].Cells["OrderId"].Value.ToString());
+                newCmd.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                newCmd.ExecuteNonQuery();
+
+                conn.Close();
+                newCmd.Dispose();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Update AliTrackingNumer to DB error. " + ex.ToString());
+                MessageBox.Show("Update AliTrackingNumber Error");
+            }
+        }
+
+        private void BtUpdateAliCashAmount_Click(object sender, EventArgs e)
+        {
+            int AliSelectedRow = dgvAli.CurrentCell.RowIndex;
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "UPDATE alitracks SET AliCashAmount=@AliCashAmount WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvAli.Rows[AliSelectedRow].Cells["Id"].Value.ToString());
+                comm.Parameters.AddWithValue("@AliCashAmount", decimal.Parse(tbAliCashAmount.Text.ToString()));
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+
+                conn.Close();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Update AliCashAmount error. " + ex.ToString());
+                MessageBox.Show("Cannot update AliCashAmount value");
+            }
+        }
+
+        private void BtnDeleteAliId_Click(object sender, EventArgs e)
+        {
+            int AliSelectedRow = dgvAli.CurrentCell.RowIndex;
+            try
+            {
+                //Add ali tracking info
+                MySqlConnection conn = new MySqlConnection(connectionString);
+                conn.Open();
+
+                MySqlCommand comm = conn.CreateCommand();
+                comm.CommandText = "DELETE FROM alitracks WHERE Id=@Id";
+
+                comm.Parameters.AddWithValue("@Id", dgvAli.Rows[AliSelectedRow].Cells["Id"].Value.ToString());
+
+                comm.ExecuteNonQuery();
+                comm.Dispose();
+
+                conn.Close();
+                conn.Dispose();
+            }
+            catch (Exception ex)
+            {
+                log.Error("Delete AliId error. " + ex.ToString());
+                MessageBox.Show("Cannot delete AliId");
             }
         }
     }

@@ -30,8 +30,6 @@
         {
             this.dgvOrders = new System.Windows.Forms.DataGridView();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.pictureBox4 = new System.Windows.Forms.PictureBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.lbAddress = new System.Windows.Forms.ListBox();
@@ -60,21 +58,30 @@
             this.dgvItems = new System.Windows.Forms.DataGridView();
             this.dgvAli = new System.Windows.Forms.DataGridView();
             this.btnSearch = new System.Windows.Forms.Button();
-            this.btnSubmit = new System.Windows.Forms.Button();
             this.tbAliId = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.tbAliCashAmount = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
             this.btnAddAliInfo = new System.Windows.Forms.Button();
             this.btResetSearch = new System.Windows.Forms.Button();
             this.dgvSkuToLink = new System.Windows.Forms.DataGridView();
             this.tbSkuLink = new System.Windows.Forms.TextBox();
             this.label3 = new System.Windows.Forms.Label();
             this.btAddSkuLink = new System.Windows.Forms.Button();
+            this.tbAliCashAmount = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.btUpdateAliCashAmount = new System.Windows.Forms.Button();
+            this.btUpdateAliTrackingNumber = new System.Windows.Forms.Button();
+            this.tbTrackingNumber = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.btnUpdateAliId = new System.Windows.Forms.Button();
+            this.btnDeleteAliId = new System.Windows.Forms.Button();
+            this.btUpdateRefund = new System.Windows.Forms.Button();
+            this.tbRefund = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
+            this.btnUpdateNote = new System.Windows.Forms.Button();
+            this.tbNote = new System.Windows.Forms.TextBox();
+            this.label8 = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).BeginInit();
             this.groupBox2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -92,47 +99,26 @@
             this.dgvOrders.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.dgvOrders.MultiSelect = false;
             this.dgvOrders.Name = "dgvOrders";
+            this.dgvOrders.ReadOnly = true;
             this.dgvOrders.RowHeadersWidth = 51;
             this.dgvOrders.RowTemplate.Height = 24;
-            this.dgvOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.dgvOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgvOrders.Size = new System.Drawing.Size(1150, 314);
             this.dgvOrders.TabIndex = 3;
             this.dgvOrders.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellClick);
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.pictureBox4);
-            this.groupBox2.Controls.Add(this.pictureBox3);
             this.groupBox2.Controls.Add(this.pictureBox2);
             this.groupBox2.Controls.Add(this.pictureBox1);
-            this.groupBox2.Location = new System.Drawing.Point(1442, 91);
+            this.groupBox2.Location = new System.Drawing.Point(1171, 344);
             this.groupBox2.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Padding = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.groupBox2.Size = new System.Drawing.Size(281, 309);
+            this.groupBox2.Size = new System.Drawing.Size(378, 167);
             this.groupBox2.TabIndex = 16;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Images";
-            // 
-            // pictureBox4
-            // 
-            this.pictureBox4.Location = new System.Drawing.Point(139, 155);
-            this.pictureBox4.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.pictureBox4.Name = "pictureBox4";
-            this.pictureBox4.Size = new System.Drawing.Size(125, 125);
-            this.pictureBox4.TabIndex = 3;
-            this.pictureBox4.TabStop = false;
-            this.pictureBox4.Click += new System.EventHandler(this.PictureBox4_Click);
-            // 
-            // pictureBox3
-            // 
-            this.pictureBox3.Location = new System.Drawing.Point(8, 155);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(125, 125);
-            this.pictureBox3.TabIndex = 2;
-            this.pictureBox3.TabStop = false;
-            this.pictureBox3.Click += new System.EventHandler(this.PictureBox3_Click);
             // 
             // pictureBox2
             // 
@@ -159,10 +145,10 @@
             this.lbAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbAddress.FormattingEnabled = true;
             this.lbAddress.ItemHeight = 17;
-            this.lbAddress.Location = new System.Drawing.Point(1181, 90);
+            this.lbAddress.Location = new System.Drawing.Point(1171, 183);
             this.lbAddress.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.lbAddress.Name = "lbAddress";
-            this.lbAddress.Size = new System.Drawing.Size(232, 310);
+            this.lbAddress.Size = new System.Drawing.Size(378, 157);
             this.lbAddress.TabIndex = 26;
             this.lbAddress.SelectedIndexChanged += new System.EventHandler(this.LbAddress_SelectedIndexChanged);
             // 
@@ -176,7 +162,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(10, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1745, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1588, 24);
             this.menuStrip1.TabIndex = 27;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -252,7 +238,7 @@
             // 
             this.cbbStatus.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbbStatus.FormattingEnabled = true;
-            this.cbbStatus.Location = new System.Drawing.Point(93, 41);
+            this.cbbStatus.Location = new System.Drawing.Point(84, 41);
             this.cbbStatus.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbStatus.Name = "cbbStatus";
             this.cbbStatus.Size = new System.Drawing.Size(117, 25);
@@ -273,7 +259,7 @@
             // 
             this.label12.AutoSize = true;
             this.label12.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label12.Location = new System.Drawing.Point(1082, 45);
+            this.label12.Location = new System.Drawing.Point(972, 44);
             this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(19, 17);
@@ -283,7 +269,7 @@
             // tbSearchOrderId
             // 
             this.tbSearchOrderId.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbSearchOrderId.Location = new System.Drawing.Point(1112, 42);
+            this.tbSearchOrderId.Location = new System.Drawing.Point(1009, 41);
             this.tbSearchOrderId.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSearchOrderId.Name = "tbSearchOrderId";
             this.tbSearchOrderId.Size = new System.Drawing.Size(244, 23);
@@ -293,7 +279,7 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label6.Location = new System.Drawing.Point(254, 44);
+            this.label6.Location = new System.Drawing.Point(223, 44);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
             this.label6.Size = new System.Drawing.Size(57, 17);
@@ -304,7 +290,7 @@
             // 
             this.cbbCountry.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbbCountry.FormattingEnabled = true;
-            this.cbbCountry.Location = new System.Drawing.Point(329, 41);
+            this.cbbCountry.Location = new System.Drawing.Point(288, 41);
             this.cbbCountry.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbCountry.Name = "cbbCountry";
             this.cbbCountry.Size = new System.Drawing.Size(117, 25);
@@ -314,7 +300,7 @@
             // 
             this.cbbAccount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbbAccount.FormattingEnabled = true;
-            this.cbbAccount.Location = new System.Drawing.Point(556, 41);
+            this.cbbAccount.Location = new System.Drawing.Point(480, 41);
             this.cbbAccount.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbAccount.Name = "cbbAccount";
             this.cbbAccount.Size = new System.Drawing.Size(117, 25);
@@ -324,7 +310,7 @@
             // 
             this.label7.AutoSize = true;
             this.label7.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.Location = new System.Drawing.Point(481, 44);
+            this.label7.Location = new System.Drawing.Point(413, 44);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(59, 17);
@@ -335,7 +321,7 @@
             // 
             this.cbbNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.cbbNote.FormattingEnabled = true;
-            this.cbbNote.Location = new System.Drawing.Point(766, 41);
+            this.cbbNote.Location = new System.Drawing.Point(663, 41);
             this.cbbNote.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbNote.Name = "cbbNote";
             this.cbbNote.Size = new System.Drawing.Size(117, 25);
@@ -345,7 +331,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label13.Location = new System.Drawing.Point(714, 44);
+            this.label13.Location = new System.Drawing.Point(617, 44);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(38, 17);
@@ -356,7 +342,7 @@
             // 
             this.label14.AutoSize = true;
             this.label14.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label14.Location = new System.Drawing.Point(915, 44);
+            this.label14.Location = new System.Drawing.Point(798, 44);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
             this.label14.Size = new System.Drawing.Size(78, 17);
@@ -366,7 +352,7 @@
             // tbSearchTradeDate
             // 
             this.tbSearchTradeDate.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbSearchTradeDate.Location = new System.Drawing.Point(1012, 42);
+            this.tbSearchTradeDate.Location = new System.Drawing.Point(884, 41);
             this.tbSearchTradeDate.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSearchTradeDate.Name = "tbSearchTradeDate";
             this.tbSearchTradeDate.Size = new System.Drawing.Size(45, 23);
@@ -381,11 +367,13 @@
             this.dgvItems.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.dgvItems.MultiSelect = false;
             this.dgvItems.Name = "dgvItems";
+            this.dgvItems.ReadOnly = true;
             this.dgvItems.RowHeadersWidth = 51;
             this.dgvItems.RowTemplate.Height = 24;
             this.dgvItems.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgvItems.Size = new System.Drawing.Size(1150, 132);
             this.dgvItems.TabIndex = 36;
+            this.dgvItems.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvItems_CellContentClick);
             // 
             // dgvAli
             // 
@@ -395,15 +383,17 @@
             this.dgvAli.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.dgvAli.MultiSelect = false;
             this.dgvAli.Name = "dgvAli";
+            this.dgvAli.ReadOnly = true;
             this.dgvAli.RowHeadersWidth = 51;
             this.dgvAli.RowTemplate.Height = 24;
             this.dgvAli.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgvAli.Size = new System.Drawing.Size(1150, 119);
             this.dgvAli.TabIndex = 37;
+            this.dgvAli.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvAli_CellContentClick);
             // 
             // btnSearch
             // 
-            this.btnSearch.Location = new System.Drawing.Point(1387, 40);
+            this.btnSearch.Location = new System.Drawing.Point(1293, 40);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(75, 29);
             this.btnSearch.TabIndex = 38;
@@ -411,20 +401,10 @@
             this.btnSearch.UseVisualStyleBackColor = true;
             this.btnSearch.Click += new System.EventHandler(this.BtnSearch_Click);
             // 
-            // btnSubmit
-            // 
-            this.btnSubmit.Location = new System.Drawing.Point(1191, 741);
-            this.btnSubmit.Name = "btnSubmit";
-            this.btnSubmit.Size = new System.Drawing.Size(532, 52);
-            this.btnSubmit.TabIndex = 39;
-            this.btnSubmit.Text = "Submit";
-            this.btnSubmit.UseVisualStyleBackColor = true;
-            this.btnSubmit.Click += new System.EventHandler(this.BtnSubmit_Click);
-            // 
             // tbAliId
             // 
             this.tbAliId.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbAliId.Location = new System.Drawing.Point(1319, 426);
+            this.tbAliId.Location = new System.Drawing.Point(1228, 534);
             this.tbAliId.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbAliId.Name = "tbAliId";
             this.tbAliId.Size = new System.Drawing.Size(244, 23);
@@ -434,38 +414,18 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(1188, 429);
+            this.label1.Location = new System.Drawing.Point(1174, 534);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(38, 17);
             this.label1.TabIndex = 41;
             this.label1.Text = "Ali Id";
             // 
-            // tbAliCashAmount
-            // 
-            this.tbAliCashAmount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbAliCashAmount.Location = new System.Drawing.Point(1319, 469);
-            this.tbAliCashAmount.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
-            this.tbAliCashAmount.Name = "tbAliCashAmount";
-            this.tbAliCashAmount.Size = new System.Drawing.Size(244, 23);
-            this.tbAliCashAmount.TabIndex = 42;
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label2.Location = new System.Drawing.Point(1188, 472);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(111, 17);
-            this.label2.TabIndex = 43;
-            this.label2.Text = "Ali Cash Amount";
-            // 
             // btnAddAliInfo
             // 
-            this.btnAddAliInfo.Location = new System.Drawing.Point(1191, 512);
+            this.btnAddAliInfo.Location = new System.Drawing.Point(1293, 562);
             this.btnAddAliInfo.Name = "btnAddAliInfo";
-            this.btnAddAliInfo.Size = new System.Drawing.Size(372, 30);
+            this.btnAddAliInfo.Size = new System.Drawing.Size(70, 30);
             this.btnAddAliInfo.TabIndex = 46;
             this.btnAddAliInfo.Text = "Add";
             this.btnAddAliInfo.UseVisualStyleBackColor = true;
@@ -473,7 +433,7 @@
             // 
             // btResetSearch
             // 
-            this.btResetSearch.Location = new System.Drawing.Point(1500, 42);
+            this.btResetSearch.Location = new System.Drawing.Point(1383, 40);
             this.btResetSearch.Name = "btResetSearch";
             this.btResetSearch.Size = new System.Drawing.Size(75, 29);
             this.btResetSearch.TabIndex = 47;
@@ -489,16 +449,18 @@
             this.dgvSkuToLink.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.dgvSkuToLink.MultiSelect = false;
             this.dgvSkuToLink.Name = "dgvSkuToLink";
+            this.dgvSkuToLink.ReadOnly = true;
             this.dgvSkuToLink.RowHeadersWidth = 51;
             this.dgvSkuToLink.RowTemplate.Height = 24;
             this.dgvSkuToLink.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
             this.dgvSkuToLink.Size = new System.Drawing.Size(1150, 119);
             this.dgvSkuToLink.TabIndex = 48;
+            this.dgvSkuToLink.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DgvSkuToLink_CellContentClick);
             // 
             // tbSkuLink
             // 
             this.tbSkuLink.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.tbSkuLink.Location = new System.Drawing.Point(1261, 588);
+            this.tbSkuLink.Location = new System.Drawing.Point(1260, 721);
             this.tbSkuLink.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSkuLink.Name = "tbSkuLink";
             this.tbSkuLink.Size = new System.Drawing.Size(302, 23);
@@ -508,7 +470,7 @@
             // 
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label3.Location = new System.Drawing.Point(1188, 591);
+            this.label3.Location = new System.Drawing.Point(1174, 724);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(65, 17);
@@ -517,7 +479,7 @@
             // 
             // btAddSkuLink
             // 
-            this.btAddSkuLink.Location = new System.Drawing.Point(1191, 616);
+            this.btAddSkuLink.Location = new System.Drawing.Point(1190, 758);
             this.btAddSkuLink.Name = "btAddSkuLink";
             this.btAddSkuLink.Size = new System.Drawing.Size(372, 30);
             this.btAddSkuLink.TabIndex = 51;
@@ -525,23 +487,175 @@
             this.btAddSkuLink.UseVisualStyleBackColor = true;
             this.btAddSkuLink.Click += new System.EventHandler(this.btAddSkuLink_Click);
             // 
+            // tbAliCashAmount
+            // 
+            this.tbAliCashAmount.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbAliCashAmount.Location = new System.Drawing.Point(1323, 609);
+            this.tbAliCashAmount.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbAliCashAmount.Name = "tbAliCashAmount";
+            this.tbAliCashAmount.Size = new System.Drawing.Size(176, 23);
+            this.tbAliCashAmount.TabIndex = 52;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Location = new System.Drawing.Point(1168, 612);
+            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(111, 17);
+            this.label2.TabIndex = 53;
+            this.label2.Text = "Ali Cash Amount";
+            // 
+            // btUpdateAliCashAmount
+            // 
+            this.btUpdateAliCashAmount.Location = new System.Drawing.Point(1506, 605);
+            this.btUpdateAliCashAmount.Name = "btUpdateAliCashAmount";
+            this.btUpdateAliCashAmount.Size = new System.Drawing.Size(70, 30);
+            this.btUpdateAliCashAmount.TabIndex = 54;
+            this.btUpdateAliCashAmount.Text = "Update";
+            this.btUpdateAliCashAmount.UseVisualStyleBackColor = true;
+            this.btUpdateAliCashAmount.Click += new System.EventHandler(this.BtUpdateAliCashAmount_Click);
+            // 
+            // btUpdateAliTrackingNumber
+            // 
+            this.btUpdateAliTrackingNumber.Location = new System.Drawing.Point(1506, 641);
+            this.btUpdateAliTrackingNumber.Name = "btUpdateAliTrackingNumber";
+            this.btUpdateAliTrackingNumber.Size = new System.Drawing.Size(70, 30);
+            this.btUpdateAliTrackingNumber.TabIndex = 57;
+            this.btUpdateAliTrackingNumber.Text = "Update";
+            this.btUpdateAliTrackingNumber.UseVisualStyleBackColor = true;
+            this.btUpdateAliTrackingNumber.Click += new System.EventHandler(this.BtUpdateAliTrackingNumber_Click);
+            // 
+            // tbTrackingNumber
+            // 
+            this.tbTrackingNumber.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbTrackingNumber.Location = new System.Drawing.Point(1323, 645);
+            this.tbTrackingNumber.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbTrackingNumber.Name = "tbTrackingNumber";
+            this.tbTrackingNumber.Size = new System.Drawing.Size(176, 23);
+            this.tbTrackingNumber.TabIndex = 55;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label4.Location = new System.Drawing.Point(1171, 648);
+            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(136, 17);
+            this.label4.TabIndex = 56;
+            this.label4.Text = "Ali Tracking Number";
+            // 
+            // btnUpdateAliId
+            // 
+            this.btnUpdateAliId.Location = new System.Drawing.Point(1388, 562);
+            this.btnUpdateAliId.Name = "btnUpdateAliId";
+            this.btnUpdateAliId.Size = new System.Drawing.Size(70, 30);
+            this.btnUpdateAliId.TabIndex = 58;
+            this.btnUpdateAliId.Text = "Update";
+            this.btnUpdateAliId.UseVisualStyleBackColor = true;
+            this.btnUpdateAliId.Click += new System.EventHandler(this.BtnUpdateAliId_Click);
+            // 
+            // btnDeleteAliId
+            // 
+            this.btnDeleteAliId.ForeColor = System.Drawing.Color.Red;
+            this.btnDeleteAliId.Location = new System.Drawing.Point(1479, 530);
+            this.btnDeleteAliId.Name = "btnDeleteAliId";
+            this.btnDeleteAliId.Size = new System.Drawing.Size(70, 30);
+            this.btnDeleteAliId.TabIndex = 59;
+            this.btnDeleteAliId.Text = "Delete";
+            this.btnDeleteAliId.UseVisualStyleBackColor = true;
+            this.btnDeleteAliId.Click += new System.EventHandler(this.BtnDeleteAliId_Click);
+            // 
+            // btUpdateRefund
+            // 
+            this.btUpdateRefund.Location = new System.Drawing.Point(1506, 101);
+            this.btUpdateRefund.Name = "btUpdateRefund";
+            this.btUpdateRefund.Size = new System.Drawing.Size(70, 30);
+            this.btUpdateRefund.TabIndex = 62;
+            this.btUpdateRefund.Text = "Update";
+            this.btUpdateRefund.UseVisualStyleBackColor = true;
+            this.btUpdateRefund.Click += new System.EventHandler(this.BtUpdateRefund_Click);
+            // 
+            // tbRefund
+            // 
+            this.tbRefund.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbRefund.Location = new System.Drawing.Point(1249, 105);
+            this.tbRefund.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbRefund.Name = "tbRefund";
+            this.tbRefund.Size = new System.Drawing.Size(250, 23);
+            this.tbRefund.TabIndex = 60;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label5.Location = new System.Drawing.Point(1187, 108);
+            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(54, 17);
+            this.label5.TabIndex = 61;
+            this.label5.Text = "Refund";
+            // 
+            // btnUpdateNote
+            // 
+            this.btnUpdateNote.Location = new System.Drawing.Point(1506, 137);
+            this.btnUpdateNote.Name = "btnUpdateNote";
+            this.btnUpdateNote.Size = new System.Drawing.Size(70, 30);
+            this.btnUpdateNote.TabIndex = 65;
+            this.btnUpdateNote.Text = "Update";
+            this.btnUpdateNote.UseVisualStyleBackColor = true;
+            this.btnUpdateNote.Click += new System.EventHandler(this.BtnUpdateNote_Click);
+            // 
+            // tbNote
+            // 
+            this.tbNote.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbNote.Location = new System.Drawing.Point(1249, 141);
+            this.tbNote.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbNote.Name = "tbNote";
+            this.tbNote.Size = new System.Drawing.Size(250, 23);
+            this.tbNote.TabIndex = 63;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label8.Location = new System.Drawing.Point(1187, 144);
+            this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(38, 17);
+            this.label8.TabIndex = 64;
+            this.label8.Text = "Note";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(1745, 805);
+            this.ClientSize = new System.Drawing.Size(1588, 805);
+            this.Controls.Add(this.btnUpdateNote);
+            this.Controls.Add(this.tbNote);
+            this.Controls.Add(this.label8);
+            this.Controls.Add(this.btUpdateRefund);
+            this.Controls.Add(this.tbRefund);
+            this.Controls.Add(this.label5);
+            this.Controls.Add(this.btnDeleteAliId);
+            this.Controls.Add(this.btnUpdateAliId);
+            this.Controls.Add(this.btUpdateAliTrackingNumber);
+            this.Controls.Add(this.tbTrackingNumber);
+            this.Controls.Add(this.label4);
+            this.Controls.Add(this.btUpdateAliCashAmount);
+            this.Controls.Add(this.tbAliCashAmount);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.btAddSkuLink);
             this.Controls.Add(this.tbSkuLink);
             this.Controls.Add(this.label3);
             this.Controls.Add(this.dgvSkuToLink);
             this.Controls.Add(this.btResetSearch);
             this.Controls.Add(this.btnAddAliInfo);
-            this.Controls.Add(this.tbAliCashAmount);
-            this.Controls.Add(this.label2);
             this.Controls.Add(this.tbAliId);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.btnSubmit);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.dgvAli);
             this.Controls.Add(this.dgvItems);
@@ -571,8 +685,6 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).EndInit();
             this.groupBox2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox4)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.menuStrip1.ResumeLayout(false);
@@ -615,13 +727,8 @@
         private System.Windows.Forms.DataGridView dgvItems;
         private System.Windows.Forms.DataGridView dgvAli;
         private System.Windows.Forms.Button btnSearch;
-        private System.Windows.Forms.PictureBox pictureBox4;
-        private System.Windows.Forms.PictureBox pictureBox3;
-        private System.Windows.Forms.Button btnSubmit;
         private System.Windows.Forms.TextBox tbAliId;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox tbAliCashAmount;
-        private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Button btnAddAliInfo;
         private System.Windows.Forms.Button btResetSearch;
         private System.Windows.Forms.DataGridView dgvSkuToLink;
@@ -629,6 +736,20 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Button btAddSkuLink;
         private System.Windows.Forms.ToolStripMenuItem loadSkuToolStripMenuItem;
+        private System.Windows.Forms.TextBox tbAliCashAmount;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button btUpdateAliCashAmount;
+        private System.Windows.Forms.Button btUpdateAliTrackingNumber;
+        private System.Windows.Forms.TextBox tbTrackingNumber;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btnUpdateAliId;
+        private System.Windows.Forms.Button btnDeleteAliId;
+        private System.Windows.Forms.Button btUpdateRefund;
+        private System.Windows.Forms.TextBox tbRefund;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Button btnUpdateNote;
+        private System.Windows.Forms.TextBox tbNote;
+        private System.Windows.Forms.Label label8;
     }
 }
 
