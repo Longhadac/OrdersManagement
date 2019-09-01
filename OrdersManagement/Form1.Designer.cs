@@ -80,6 +80,13 @@
             this.btnUpdateNote = new System.Windows.Forms.Button();
             this.tbNote = new System.Windows.Forms.TextBox();
             this.label8 = new System.Windows.Forms.Label();
+            this.tbSearchAliId = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.tbSearchAsin = new System.Windows.Forms.TextBox();
+            this.label10 = new System.Windows.Forms.Label();
+            this.tbSearchSku = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.reportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)(this.dgvOrders)).BeginInit();
             this.groupBox2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -95,7 +102,7 @@
             this.dgvOrders.AllowUserToAddRows = false;
             this.dgvOrders.AllowUserToDeleteRows = false;
             this.dgvOrders.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dgvOrders.Location = new System.Drawing.Point(13, 90);
+            this.dgvOrders.Location = new System.Drawing.Point(13, 105);
             this.dgvOrders.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.dgvOrders.MultiSelect = false;
             this.dgvOrders.Name = "dgvOrders";
@@ -103,7 +110,7 @@
             this.dgvOrders.RowHeadersWidth = 51;
             this.dgvOrders.RowTemplate.Height = 24;
             this.dgvOrders.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.CellSelect;
-            this.dgvOrders.Size = new System.Drawing.Size(1150, 314);
+            this.dgvOrders.Size = new System.Drawing.Size(1150, 299);
             this.dgvOrders.TabIndex = 3;
             this.dgvOrders.CellClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.DataGridView1_CellClick);
             // 
@@ -144,11 +151,11 @@
             // 
             this.lbAddress.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbAddress.FormattingEnabled = true;
-            this.lbAddress.ItemHeight = 17;
+            this.lbAddress.ItemHeight = 20;
             this.lbAddress.Location = new System.Drawing.Point(1171, 183);
             this.lbAddress.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.lbAddress.Name = "lbAddress";
-            this.lbAddress.Size = new System.Drawing.Size(378, 157);
+            this.lbAddress.Size = new System.Drawing.Size(378, 144);
             this.lbAddress.TabIndex = 26;
             this.lbAddress.SelectedIndexChanged += new System.EventHandler(this.LbAddress_SelectedIndexChanged);
             // 
@@ -162,7 +169,7 @@
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
             this.menuStrip1.Padding = new System.Windows.Forms.Padding(10, 2, 0, 2);
-            this.menuStrip1.Size = new System.Drawing.Size(1588, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1588, 28);
             this.menuStrip1.TabIndex = 27;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -173,27 +180,27 @@
             this.loadProfilesToolStripMenuItem,
             this.loadSkuToolStripMenuItem});
             this.loadDataToolStripMenuItem.Name = "loadDataToolStripMenuItem";
-            this.loadDataToolStripMenuItem.Size = new System.Drawing.Size(72, 20);
+            this.loadDataToolStripMenuItem.Size = new System.Drawing.Size(92, 24);
             this.loadDataToolStripMenuItem.Text = "Load Data";
             // 
             // loadOrdersToolStripMenuItem
             // 
             this.loadOrdersToolStripMenuItem.Name = "loadOrdersToolStripMenuItem";
-            this.loadOrdersToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.loadOrdersToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.loadOrdersToolStripMenuItem.Text = "Load Orders";
             this.loadOrdersToolStripMenuItem.Click += new System.EventHandler(this.LoadOrdersToolStripMenuItem_Click);
             // 
             // loadProfilesToolStripMenuItem
             // 
             this.loadProfilesToolStripMenuItem.Name = "loadProfilesToolStripMenuItem";
-            this.loadProfilesToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.loadProfilesToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.loadProfilesToolStripMenuItem.Text = "Load Profiles";
             this.loadProfilesToolStripMenuItem.Click += new System.EventHandler(this.LoadProfilesToolStripMenuItem_Click);
             // 
             // loadSkuToolStripMenuItem
             // 
             this.loadSkuToolStripMenuItem.Name = "loadSkuToolStripMenuItem";
-            this.loadSkuToolStripMenuItem.Size = new System.Drawing.Size(142, 22);
+            this.loadSkuToolStripMenuItem.Size = new System.Drawing.Size(178, 26);
             this.loadSkuToolStripMenuItem.Text = "Load Sku";
             this.loadSkuToolStripMenuItem.Click += new System.EventHandler(this.LoadSkuToolStripMenuItem_Click);
             // 
@@ -204,34 +211,36 @@
             this.getAliTrackingNumberToolStripMenuItem,
             this.fillTrackingNumberToolStripMenuItem});
             this.getDataToDBToolStripMenuItem.Name = "getDataToDBToolStripMenuItem";
-            this.getDataToDBToolStripMenuItem.Size = new System.Drawing.Size(95, 20);
+            this.getDataToDBToolStripMenuItem.Size = new System.Drawing.Size(122, 24);
             this.getDataToDBToolStripMenuItem.Text = "Get data to DB";
             // 
             // getAmazonOrdersToolStripMenuItem
             // 
             this.getAmazonOrdersToolStripMenuItem.Name = "getAmazonOrdersToolStripMenuItem";
-            this.getAmazonOrdersToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.getAmazonOrdersToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.getAmazonOrdersToolStripMenuItem.Text = "Get Amazon Orders";
             this.getAmazonOrdersToolStripMenuItem.Click += new System.EventHandler(this.GetAmazonOrdersToolStripMenuItem_Click);
             // 
             // getAliTrackingNumberToolStripMenuItem
             // 
             this.getAliTrackingNumberToolStripMenuItem.Name = "getAliTrackingNumberToolStripMenuItem";
-            this.getAliTrackingNumberToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.getAliTrackingNumberToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.getAliTrackingNumberToolStripMenuItem.Text = "Get Ali Tracking Number";
             this.getAliTrackingNumberToolStripMenuItem.Click += new System.EventHandler(this.GetAliTrackingNumberToolStripMenuItem_Click);
             // 
             // fillTrackingNumberToolStripMenuItem
             // 
             this.fillTrackingNumberToolStripMenuItem.Name = "fillTrackingNumberToolStripMenuItem";
-            this.fillTrackingNumberToolStripMenuItem.Size = new System.Drawing.Size(203, 22);
+            this.fillTrackingNumberToolStripMenuItem.Size = new System.Drawing.Size(254, 26);
             this.fillTrackingNumberToolStripMenuItem.Text = "Fill Tracking Number";
             this.fillTrackingNumberToolStripMenuItem.Click += new System.EventHandler(this.FillTrackingNumberToolStripMenuItem_Click);
             // 
             // reportsToolStripMenuItem
             // 
+            this.reportsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.reportToolStripMenuItem});
             this.reportsToolStripMenuItem.Name = "reportsToolStripMenuItem";
-            this.reportsToolStripMenuItem.Size = new System.Drawing.Size(59, 20);
+            this.reportsToolStripMenuItem.Size = new System.Drawing.Size(74, 24);
             this.reportsToolStripMenuItem.Text = "Reports";
             // 
             // cbbStatus
@@ -241,7 +250,7 @@
             this.cbbStatus.Location = new System.Drawing.Point(84, 41);
             this.cbbStatus.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbStatus.Name = "cbbStatus";
-            this.cbbStatus.Size = new System.Drawing.Size(117, 25);
+            this.cbbStatus.Size = new System.Drawing.Size(117, 28);
             this.cbbStatus.TabIndex = 18;
             // 
             // label11
@@ -251,7 +260,7 @@
             this.label11.Location = new System.Drawing.Point(28, 44);
             this.label11.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(48, 17);
+            this.label11.Size = new System.Drawing.Size(57, 20);
             this.label11.TabIndex = 15;
             this.label11.Text = "Status";
             // 
@@ -262,7 +271,7 @@
             this.label12.Location = new System.Drawing.Point(972, 44);
             this.label12.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(19, 17);
+            this.label12.Size = new System.Drawing.Size(22, 20);
             this.label12.TabIndex = 21;
             this.label12.Text = "Id";
             // 
@@ -272,7 +281,7 @@
             this.tbSearchOrderId.Location = new System.Drawing.Point(1009, 41);
             this.tbSearchOrderId.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSearchOrderId.Name = "tbSearchOrderId";
-            this.tbSearchOrderId.Size = new System.Drawing.Size(244, 23);
+            this.tbSearchOrderId.Size = new System.Drawing.Size(244, 27);
             this.tbSearchOrderId.TabIndex = 15;
             // 
             // label6
@@ -282,7 +291,7 @@
             this.label6.Location = new System.Drawing.Point(223, 44);
             this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(57, 17);
+            this.label6.Size = new System.Drawing.Size(67, 20);
             this.label6.TabIndex = 28;
             this.label6.Text = "Country";
             // 
@@ -293,7 +302,7 @@
             this.cbbCountry.Location = new System.Drawing.Point(288, 41);
             this.cbbCountry.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbCountry.Name = "cbbCountry";
-            this.cbbCountry.Size = new System.Drawing.Size(117, 25);
+            this.cbbCountry.Size = new System.Drawing.Size(117, 28);
             this.cbbCountry.TabIndex = 29;
             // 
             // cbbAccount
@@ -303,7 +312,7 @@
             this.cbbAccount.Location = new System.Drawing.Point(480, 41);
             this.cbbAccount.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbAccount.Name = "cbbAccount";
-            this.cbbAccount.Size = new System.Drawing.Size(117, 25);
+            this.cbbAccount.Size = new System.Drawing.Size(117, 28);
             this.cbbAccount.TabIndex = 31;
             // 
             // label7
@@ -313,7 +322,7 @@
             this.label7.Location = new System.Drawing.Point(413, 44);
             this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(59, 17);
+            this.label7.Size = new System.Drawing.Size(70, 20);
             this.label7.TabIndex = 30;
             this.label7.Text = "Account";
             // 
@@ -324,7 +333,7 @@
             this.cbbNote.Location = new System.Drawing.Point(663, 41);
             this.cbbNote.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.cbbNote.Name = "cbbNote";
-            this.cbbNote.Size = new System.Drawing.Size(117, 25);
+            this.cbbNote.Size = new System.Drawing.Size(117, 28);
             this.cbbNote.TabIndex = 33;
             // 
             // label13
@@ -334,7 +343,7 @@
             this.label13.Location = new System.Drawing.Point(617, 44);
             this.label13.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(38, 17);
+            this.label13.Size = new System.Drawing.Size(44, 20);
             this.label13.TabIndex = 32;
             this.label13.Text = "Note";
             // 
@@ -345,7 +354,7 @@
             this.label14.Location = new System.Drawing.Point(798, 44);
             this.label14.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label14.Name = "label14";
-            this.label14.Size = new System.Drawing.Size(78, 17);
+            this.label14.Size = new System.Drawing.Size(89, 20);
             this.label14.TabIndex = 34;
             this.label14.Text = "Trade date";
             // 
@@ -355,7 +364,7 @@
             this.tbSearchTradeDate.Location = new System.Drawing.Point(884, 41);
             this.tbSearchTradeDate.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSearchTradeDate.Name = "tbSearchTradeDate";
-            this.tbSearchTradeDate.Size = new System.Drawing.Size(45, 23);
+            this.tbSearchTradeDate.Size = new System.Drawing.Size(45, 27);
             this.tbSearchTradeDate.TabIndex = 35;
             // 
             // dgvItems
@@ -407,7 +416,7 @@
             this.tbAliId.Location = new System.Drawing.Point(1228, 534);
             this.tbAliId.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbAliId.Name = "tbAliId";
-            this.tbAliId.Size = new System.Drawing.Size(244, 23);
+            this.tbAliId.Size = new System.Drawing.Size(244, 27);
             this.tbAliId.TabIndex = 40;
             // 
             // label1
@@ -417,7 +426,7 @@
             this.label1.Location = new System.Drawing.Point(1174, 534);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(38, 17);
+            this.label1.Size = new System.Drawing.Size(46, 20);
             this.label1.TabIndex = 41;
             this.label1.Text = "Ali Id";
             // 
@@ -463,7 +472,7 @@
             this.tbSkuLink.Location = new System.Drawing.Point(1260, 721);
             this.tbSkuLink.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbSkuLink.Name = "tbSkuLink";
-            this.tbSkuLink.Size = new System.Drawing.Size(302, 23);
+            this.tbSkuLink.Size = new System.Drawing.Size(302, 27);
             this.tbSkuLink.TabIndex = 49;
             // 
             // label3
@@ -473,7 +482,7 @@
             this.label3.Location = new System.Drawing.Point(1174, 724);
             this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(65, 17);
+            this.label3.Size = new System.Drawing.Size(78, 20);
             this.label3.TabIndex = 50;
             this.label3.Text = "New Link";
             // 
@@ -493,7 +502,7 @@
             this.tbAliCashAmount.Location = new System.Drawing.Point(1323, 609);
             this.tbAliCashAmount.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbAliCashAmount.Name = "tbAliCashAmount";
-            this.tbAliCashAmount.Size = new System.Drawing.Size(176, 23);
+            this.tbAliCashAmount.Size = new System.Drawing.Size(176, 27);
             this.tbAliCashAmount.TabIndex = 52;
             // 
             // label2
@@ -503,7 +512,7 @@
             this.label2.Location = new System.Drawing.Point(1168, 612);
             this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(111, 17);
+            this.label2.Size = new System.Drawing.Size(134, 20);
             this.label2.TabIndex = 53;
             this.label2.Text = "Ali Cash Amount";
             // 
@@ -533,7 +542,7 @@
             this.tbTrackingNumber.Location = new System.Drawing.Point(1323, 645);
             this.tbTrackingNumber.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbTrackingNumber.Name = "tbTrackingNumber";
-            this.tbTrackingNumber.Size = new System.Drawing.Size(176, 23);
+            this.tbTrackingNumber.Size = new System.Drawing.Size(176, 27);
             this.tbTrackingNumber.TabIndex = 55;
             // 
             // label4
@@ -543,7 +552,7 @@
             this.label4.Location = new System.Drawing.Point(1171, 648);
             this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(136, 17);
+            this.label4.Size = new System.Drawing.Size(161, 20);
             this.label4.TabIndex = 56;
             this.label4.Text = "Ali Tracking Number";
             // 
@@ -584,7 +593,7 @@
             this.tbRefund.Location = new System.Drawing.Point(1249, 105);
             this.tbRefund.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbRefund.Name = "tbRefund";
-            this.tbRefund.Size = new System.Drawing.Size(250, 23);
+            this.tbRefund.Size = new System.Drawing.Size(250, 27);
             this.tbRefund.TabIndex = 60;
             // 
             // label5
@@ -594,7 +603,7 @@
             this.label5.Location = new System.Drawing.Point(1187, 108);
             this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(54, 17);
+            this.label5.Size = new System.Drawing.Size(62, 20);
             this.label5.TabIndex = 61;
             this.label5.Text = "Refund";
             // 
@@ -614,7 +623,7 @@
             this.tbNote.Location = new System.Drawing.Point(1249, 141);
             this.tbNote.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
             this.tbNote.Name = "tbNote";
-            this.tbNote.Size = new System.Drawing.Size(250, 23);
+            this.tbNote.Size = new System.Drawing.Size(250, 27);
             this.tbNote.TabIndex = 63;
             // 
             // label8
@@ -624,16 +633,89 @@
             this.label8.Location = new System.Drawing.Point(1187, 144);
             this.label8.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label8.Name = "label8";
-            this.label8.Size = new System.Drawing.Size(38, 17);
+            this.label8.Size = new System.Drawing.Size(44, 20);
             this.label8.TabIndex = 64;
             this.label8.Text = "Note";
             // 
+            // tbSearchAliId
+            // 
+            this.tbSearchAliId.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbSearchAliId.Location = new System.Drawing.Point(84, 78);
+            this.tbSearchAliId.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbSearchAliId.Name = "tbSearchAliId";
+            this.tbSearchAliId.Size = new System.Drawing.Size(196, 27);
+            this.tbSearchAliId.TabIndex = 66;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label9.Location = new System.Drawing.Point(28, 81);
+            this.label9.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(46, 20);
+            this.label9.TabIndex = 67;
+            this.label9.Text = "Ali Id";
+            // 
+            // tbSearchAsin
+            // 
+            this.tbSearchAsin.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbSearchAsin.Location = new System.Drawing.Point(416, 78);
+            this.tbSearchAsin.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbSearchAsin.Name = "tbSearchAsin";
+            this.tbSearchAsin.Size = new System.Drawing.Size(196, 27);
+            this.tbSearchAsin.TabIndex = 68;
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label10.Location = new System.Drawing.Point(360, 81);
+            this.label10.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(47, 20);
+            this.label10.TabIndex = 69;
+            this.label10.Text = "ASIN";
+            // 
+            // tbSearchSku
+            // 
+            this.tbSearchSku.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.tbSearchSku.Location = new System.Drawing.Point(769, 78);
+            this.tbSearchSku.Margin = new System.Windows.Forms.Padding(4, 2, 4, 2);
+            this.tbSearchSku.Name = "tbSearchSku";
+            this.tbSearchSku.Size = new System.Drawing.Size(196, 27);
+            this.tbSearchSku.TabIndex = 70;
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.2F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label15.Location = new System.Drawing.Point(713, 81);
+            this.label15.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(43, 20);
+            this.label15.TabIndex = 71;
+            this.label15.Text = "SKU";
+            // 
+            // reportToolStripMenuItem
+            // 
+            this.reportToolStripMenuItem.Name = "reportToolStripMenuItem";
+            this.reportToolStripMenuItem.Size = new System.Drawing.Size(224, 26);
+            this.reportToolStripMenuItem.Text = "Report";
+            this.reportToolStripMenuItem.Click += new System.EventHandler(this.ReportToolStripMenuItem_Click);
+            // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 17F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(10F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(1588, 805);
+            this.Controls.Add(this.tbSearchSku);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.tbSearchAsin);
+            this.Controls.Add(this.label10);
+            this.Controls.Add(this.tbSearchAliId);
+            this.Controls.Add(this.label9);
             this.Controls.Add(this.btnUpdateNote);
             this.Controls.Add(this.tbNote);
             this.Controls.Add(this.label8);
@@ -750,6 +832,13 @@
         private System.Windows.Forms.Button btnUpdateNote;
         private System.Windows.Forms.TextBox tbNote;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox tbSearchAliId;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.TextBox tbSearchAsin;
+        private System.Windows.Forms.Label label10;
+        private System.Windows.Forms.TextBox tbSearchSku;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.ToolStripMenuItem reportToolStripMenuItem;
     }
 }
 

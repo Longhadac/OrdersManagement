@@ -120,6 +120,8 @@ namespace OrdersManagement
             }
             catch { }
 
+            ClearTextBox();
+
             lbAddress.Items.Clear();
             int OrderSelectedRow = dgvOrders.CurrentCell.RowIndex;
             string[] address = dgvOrders.Rows[OrderSelectedRow].Cells["ShipAddress"].Value.ToString().Split('\n');
@@ -268,21 +270,31 @@ namespace OrdersManagement
 
             foreach (var infor in infors)
             {
-                MySqlCommand comm = conn.CreateCommand();
-                comm.CommandText = "UPDATE alitracks SET AliCashAmount=@AliCashAmount,AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate WHERE Id=@Id";
+                try
+                {
+                    MySqlCommand comm = conn.CreateCommand();
+                    comm.CommandText = "UPDATE alitracks SET AliCashAmount=@AliCashAmount,AliTrackingNumber=@AliTrackingNumber, AliTrackingDate=@AliTrackingDate WHERE Id=@Id";
 
-                comm.Parameters.AddWithValue("@Id", infor.TrackingId);
-                comm.Parameters.AddWithValue("@AliTrackingNumber", infor.TrackingNumber);
-                comm.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-                comm.Parameters.AddWithValue("@AliCashAmount", infor.AliAmount);
-                comm.ExecuteNonQuery();
+                    comm.Parameters.AddWithValue("@Id", infor.TrackingId);
+                    comm.Parameters.AddWithValue("@AliTrackingNumber", infor.TrackingNumber);
+                    comm.Parameters.AddWithValue("@AliTrackingDate", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                    comm.Parameters.AddWithValue("@AliCashAmount", infor.AliAmount);
+                    comm.ExecuteNonQuery();
 
-                MySqlCommand orderComm = conn.CreateCommand();
-                orderComm.CommandText = "UPDATE orders SET Status=@Status WHERE Id=@Id";
+                    MySqlCommand orderComm = conn.CreateCommand();
+                    orderComm.CommandText = "UPDATE orders SET Status=@Status WHERE Id=@Id";
 
-                orderComm.Parameters.AddWithValue("@Id", infor.OrderId);
-                orderComm.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
-                orderComm.ExecuteNonQuery();
+                    orderComm.Parameters.AddWithValue("@Id", infor.OrderId);
+                    orderComm.Parameters.AddWithValue("@Status", Status.Shipped.ToString());
+                    orderComm.ExecuteNonQuery();
+                }
+                catch(Exception ex)
+                {
+                    log.Error("Save tracking number error");
+                    log.Error("OrderId: " + infor.OrderId);
+                    log.Error("TrackingId: " + infor.TrackingId);
+                    log.Error("Exception: " + ex.ToString());
+                }
             }
 
             conn.Close();
@@ -540,32 +552,39 @@ namespace OrdersManagement
             List<TrackingInfos> trackingList = new List<TrackingInfos>();
             foreach (DataRow row in trackingInfo.Rows)
             {
-                driver.Navigate().GoToUrl("https://trade.aliexpress.com");
-                Thread.Sleep(threadDelay);
-
-                IWebElement orderId = driver.FindElement(By.Id("order-no"));
-                orderId.SendKeys(row["AliId"].ToString());
-                driver.FindElement(By.Id("search-btn")).Click();
-
-                string AliStatusXpath = ConfigurationManager.AppSettings["AliStatusXPath"];
-                string status = driver.FindElement(By.XPath(AliStatusXpath)).Text;
-                if (status == "Awaiting delivery")
+                try
                 {
-                    TrackingInfos infor = new TrackingInfos();
-                    infor.OrderId = int.Parse(row["OrderId"].ToString());
-                    infor.TrackingId = int.Parse(row["Id"].ToString());
-
-                    string AliTotalAmountXpath = ConfigurationManager.AppSettings["AliTotalAmount"];
-                    string totalAmountString = driver.FindElement(By.XPath(AliTotalAmountXpath)).Text;
-                    infor.AliAmount = decimal.Parse(totalAmountString.Remove(0, 2), NumberStyles.Currency);
-
-                    string AliOrderDetail = ConfigurationManager.AppSettings["AliOrderDetail"];
-                    driver.Navigate().GoToUrl(AliOrderDetail + row["AliId"].ToString());
+                    driver.Navigate().GoToUrl("https://trade.aliexpress.com");
                     Thread.Sleep(threadDelay);
 
-                    string AliTrackingNumberXpath = ConfigurationManager.AppSettings["AliTrackingNumberXpath"];
-                    infor.TrackingNumber = driver.FindElement(By.XPath(AliTrackingNumberXpath)).Text;
-                    trackingList.Add(infor);
+                    IWebElement orderId = driver.FindElement(By.Id("order-no"));
+                    orderId.SendKeys(row["AliId"].ToString());
+                    driver.FindElement(By.Id("search-btn")).Click();
+
+                    string AliStatusXpath = ConfigurationManager.AppSettings["AliStatusXPath"];
+                    string status = driver.FindElement(By.XPath(AliStatusXpath)).Text;
+                    if (status == "Awaiting delivery")
+                    {
+                        TrackingInfos infor = new TrackingInfos();
+                        infor.OrderId = int.Parse(row["OrderId"].ToString());
+                        infor.TrackingId = int.Parse(row["Id"].ToString());
+
+                        string AliTotalAmountXpath = ConfigurationManager.AppSettings["AliTotalAmount"];
+                        string totalAmountString = driver.FindElement(By.XPath(AliTotalAmountXpath)).Text;
+                        infor.AliAmount = decimal.Parse(totalAmountString.Remove(0, 2), NumberStyles.Currency);
+
+                        string AliOrderDetail = ConfigurationManager.AppSettings["AliOrderDetail"];
+                        driver.Navigate().GoToUrl(AliOrderDetail + row["AliId"].ToString());
+                        Thread.Sleep(threadDelay);
+
+                        string AliTrackingNumberXpath = ConfigurationManager.AppSettings["AliTrackingNumberXpath"];
+                        infor.TrackingNumber = driver.FindElement(By.XPath(AliTrackingNumberXpath)).Text;
+                        trackingList.Add(infor);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    log.Warn("Error get tracking number: " + ex.ToString());
                 }
             }
             //Save tracking number to DB
@@ -664,15 +683,44 @@ namespace OrdersManagement
                 conn.Open();
                 string query = "SELECT * FROM orders WHERE 1=1 ";
 
+                bool isJoinItem = false;
+                bool isJoinTracking = false;
+
+                if (!string.IsNullOrEmpty(tbSearchTradeDate.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchTradeDate.Text.ToString()))
+                {
+                    isJoinTracking = true;
+                }
+                if (!string.IsNullOrEmpty(tbSearchAliId.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchAliId.Text.ToString()))
+                {
+                    isJoinTracking = true;
+                }
+                if (!string.IsNullOrEmpty(tbSearchAsin.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchAsin.Text.ToString()))
+                {
+                    isJoinItem = true;
+                }
+                if (!string.IsNullOrEmpty(tbSearchSku.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchSku.Text.ToString()))
+                {
+                    isJoinItem = true;
+                }
+
+                if(isJoinItem || isJoinTracking)
+                {
+                    if(isJoinTracking && !isJoinItem)
+                        query = "SELECT orders.* FROM orders INNER JOIN alitracks ON orders.Id = alitracks.OrderId WHERE 1=1 ";
+                    if (isJoinItem && !isJoinTracking)
+                        query = "SELECT orders.* FROM orders INNER JOIN items ON orders.Id = items.OrderId WHERE 1=1 ";
+                    else
+                        query = "SELECT orders.* FROM orders INNER JOIN alitracks ON orders.Id = alitracks.OrderId INNER JOIN items ON orders.Id = items.OrderId WHERE 1=1 ";
+                }
+
                 //Add filter condition:
                 //Trade date: less than
                 if (!string.IsNullOrEmpty(tbSearchTradeDate.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchTradeDate.Text.ToString()))
-                {
-                    query = "SELECT orders.* FROM orders INNER JOIN alitracks ON orders.Id = alitracks.OrderId WHERE ";
+                {                    
                     DateTime searchDate = DateTime.Now;
                     int range = 0 - int.Parse(tbSearchTradeDate.Text.ToString());
                     searchDate = searchDate.AddDays(range);
-                    query += " alitracks.AliTrackingDate >='" + searchDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
+                    query += " AND alitracks.AliTrackingDate >='" + searchDate.ToString("yyyy-MM-dd HH:mm:ss") + "'";
                 }
 
                 //Status
@@ -695,6 +743,16 @@ namespace OrdersManagement
                 //Amz Order Id: like
                 if (!string.IsNullOrEmpty(tbSearchOrderId.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchOrderId.Text.ToString()))
                     query += " AND orders.AmzOrderId like '%" + tbSearchOrderId.Text.ToString() + "%'";
+
+                //Ali ID
+                if (!string.IsNullOrEmpty(tbSearchAliId.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchAliId.Text.ToString()))
+                    query += " AND alitracks.AliId like '%" + tbSearchAliId.Text.ToString() + "%'";
+                //ASIN
+                if (!string.IsNullOrEmpty(tbSearchAsin.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchAsin.Text.ToString()))
+                    query += " AND items.Asin like '%" + tbSearchAsin.Text.ToString() + "%'";
+                //SKU
+                if (!string.IsNullOrEmpty(tbSearchSku.Text.ToString()) && !string.IsNullOrWhiteSpace(tbSearchSku.Text.ToString()))
+                    query += " AND items.Sku like '%" + tbSearchSku.Text.ToString() + "%'";
 
                 orderDataAdapter = new MySqlDataAdapter(query, conn);
                 ordersTable = new DataTable();
@@ -826,6 +884,10 @@ namespace OrdersManagement
             tbSearchOrderId.Text = "";
             tbSearchTradeDate.Text = "";
 
+            tbSearchAliId.Text = "";
+            tbSearchAsin.Text = "";
+            tbSearchSku.Text = "";
+
             BtnSearch_Click(null, null);
         }
 
@@ -838,7 +900,7 @@ namespace OrdersManagement
                 conn = new MySqlConnection();
                 conn.ConnectionString = connectionString;
                 conn.Open();
-                string query = "SELECT * FROM skuToLink";
+                string query = "SELECT * FROM skutolink";
                 SkuDataAdapter = new MySqlDataAdapter(query, conn);
                 skuTable = new DataTable();
                 SkuDataAdapter.Fill(skuTable);
@@ -860,7 +922,7 @@ namespace OrdersManagement
                 conn.Open();
 
                 MySqlCommand comm = conn.CreateCommand();
-                comm.CommandText = "INSERT INTO skuToLink(Sku,Link) " +
+                comm.CommandText = "INSERT INTO skutolink(Sku,Link) " +
                     "VALUES(@Sku, @Link)";
 
                 comm.Parameters.AddWithValue("@Sku", dgvItems.Rows[ItemSelectedRow].Cells["Sku"].Value.ToString());
@@ -1092,6 +1154,14 @@ namespace OrdersManagement
                 comm.ExecuteNonQuery();
                 comm.Dispose();
 
+                MySqlCommand newComm = conn.CreateCommand();
+                newComm.CommandText = "UPDATE orders SET Status = @Status WHERE Id=@Id";
+
+                newComm.Parameters.AddWithValue("@Id", dgvAli.Rows[AliSelectedRow].Cells["OrderId"].Value.ToString());
+                newComm.Parameters.AddWithValue("@Status", Status.NewOrder.ToString());
+                newComm.ExecuteNonQuery();
+                newComm.Dispose();
+
                 conn.Close();
                 conn.Dispose();
             }
@@ -1100,6 +1170,28 @@ namespace OrdersManagement
                 log.Error("Delete AliId error. " + ex.ToString());
                 MessageBox.Show("Cannot delete AliId");
             }
+        }
+
+        private void ClearTextBox()
+        {
+            tbRefund.Text = "";
+            tbNote.Text = "";
+            tbAliId.Text = "";
+            tbAliCashAmount.Text = "";
+            tbTrackingNumber.Text = "";
+            tbSkuLink.Text = "";
+        }
+
+        private void ReportToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                using (var form = new Report())
+                {
+                    form.ShowDialog();
+                }
+            }
+            catch (Exception ex) { }
         }
     }
 }
